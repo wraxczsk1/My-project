@@ -4,6 +4,13 @@
     {% for key, label in column_types.items() %}
       <option value="{{ key }}" {% if key == type %}selected{% endif %}>{{ label }}</option>
     {% endfor %}
+    {% if all_tables %}
+    <optgroup label="Odkaz na tabulku">
+      {% for t in all_tables %}
+        <option value="REF:{{ t }}" {% if 'REF:' ~ t == type %}selected{% endif %}>→ {{ t }}</option>
+      {% endfor %}
+    </optgroup>
+    {% endif %}
   </select>
   {% if removable %}<button type="button" class="btn small remove-col" title="Odebrat">×</button>{% endif %}
 </div>

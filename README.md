@@ -1,15 +1,19 @@
-# MiniDB
+# LSPD Akademie
 
-Jednoduchá webová databázová aplikace (Flask + SQLite).
+Databázová aplikace pro výcvik LSPD (FiveM) postavená na Flask + SQLite.
 
 ## Funkce
 
-- vytváření tabulek s vlastními sloupci (text, celé číslo, desetinné číslo, datum, ano/ne)
-- přidávání, úprava a mazání záznamů s validací typů
-- fulltextové hledání přes všechny sloupce, řazení kliknutím na hlavičku, stránkování
-- přidání sloupce do existující tabulky, smazání tabulky
-- import a export CSV
-- SQL konzole pouze pro čtení (`SELECT` dotazy)
+- **Nástěnka**: počet důstojníků, kadetů, kdo je právě ve službě (nástup / ukončení služby jedním klikem), poslední výcviky
+- **Výcvik**: přehled všech důstojníků a jejich splněných modulů podle kategorií LSPD Manualu
+  (Základy služby, Radiová komunikace, Zdravověda, Dopravní postupy, Evidence a MDT, Taktika a zásah, Kriminalistika)
+- **Karta důstojníka**: seznam modulů se stavem, datem, body a instruktorem, tlačítko „Zapsat“ u nesplněných
+- tabulky `dustojnici`, `hodnosti`, `kategorie`, `vycviky`, `absolvovane_vycviky`, `sluzby` – vše lze upravovat
+- obecný databázový editor: vlastní tabulky a sloupce (text, číslo, datum, datum a čas, ano/ne, odkaz na jinou tabulku),
+  hledání, řazení, stránkování, import/export CSV, SQL konzole pouze pro čtení
+
+Při prvním spuštění se databáze naplní hodnostmi, kategoriemi a moduly výcviku a třemi ukázkovými důstojníky
+(ty můžeš smazat).
 
 ## Spuštění
 

@@ -1,13 +1,13 @@
 {% extends "base.html" %}
-{% block title %}{{ table }}{% endblock %}
-{% macro sort_link(col) -%}
+{% block title %}{{ table|pretty }}{% endblock %}
+{% macro sort_link(col, label) -%}
   {%- set next_dir = 'desc' if sort == col and direction == 'asc' else 'asc' -%}
-  <a href="{{ url_for('view_table', table=table, q=q, sort=col, dir=next_dir) }}">{{ col }}
+  <a href="{{ url_for('view_table', table=table, q=q, sort=col, dir=next_dir) }}">{{ label }}
     {%- if sort == col %} {{ '▲' if direction == 'asc' else '▼' }}{% endif %}</a>
 {%- endmacro %}
 {% block content %}
 <div class="header">
-  <h1>{{ table }} <span class="muted">({{ total }})</span></h1>
+  <h1>{{ table|pretty }} <span class="muted">({{ total }})</span></h1>
   <div class="toolbar">
     <a class="btn primary" href="{{ url_for('add_row', table=table) }}">+ Přidat záznam</a>
     <a class="btn" href="{{ url_for('export_csv', table=table) }}">Export CSV</a>
@@ -26,9 +26,9 @@
 <table class="data">
   <thead>
     <tr>
-      <th>{{ sort_link('id') }}</th>
+      <th>{{ sort_link('id', 'id') }}</th>
       {% for c in columns %}
-        <th>{{ sort_link(c.name) }}<small>{{ column_types.get(c.type, c.type) }}</small></th>
+        <th>{{ sort_link(c.name, c.name|pretty) }}<small>{{ ('→ ' ~ c.ref) if c.ref else column_types.get(c.type, c.type) }}</small></th>
       {% endfor %}
       <th></th>
     </tr>
@@ -39,13 +39,10 @@
       <td class="muted">{{ r['id'] }}</td>
       {% for c in columns %}
         {% set v = r[c.name] %}
-        <td class="type-{{ c.type|lower }}">
-          {%- if v is none %}<span class="null">—</span>
-          {%- elif c.type == 'BOOLEAN' %}{{ 'Ano' if v else 'Ne' }}
-          {%- else %}{{ v }}{% endif -%}
-        </td>
+        <td class="type-{{ c.type|lower }}">{% include "_cell.html" %}</td>
       {% endfor %}
       <td><div class="row-actions">
+        {% if table == 'dustojnici' and lspd %}<a class="btn small" href="{{ url_for('officer_training', officer_id=r['id']) }}">Výcvik</a>{% endif %}
         <a class="btn small" href="{{ url_for('edit_row', table=table, row_id=r['id']) }}">Upravit</a>
         <form method="post" action="{{ url_for('delete_row', table=table, row_id=r['id']) }}" data-confirm="Smazat záznam #{{ r['id'] }}?">
           <button class="btn small danger">Smazat</button>

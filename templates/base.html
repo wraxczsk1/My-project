@@ -3,21 +3,27 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}Databáze{% endblock %} · MiniDB</title>
+  <title>{% block title %}Databáze{% endblock %} · LSPD Akademie</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
   <aside class="sidebar">
-    <a class="brand" href="{{ url_for('index') }}">MiniDB</a>
+    <a class="brand" href="{{ url_for('index') }}"><span class="badge">★</span> LSPD<small>Akademie výcviku</small></a>
     <nav>
-      <a href="{{ url_for('index') }}">Přehled</a>
+      <a href="{{ url_for('index') }}">Nástěnka</a>
+      {% if lspd %}
+      <a href="{{ url_for('training') }}">Výcvik</a>
+      <a href="{{ url_for('view_table', table='dustojnici') }}">Důstojníci</a>
+      <a href="{{ url_for('view_table', table='sluzby', sort='id', dir='desc') }}">Služby</a>
+      <a href="{{ url_for('view_table', table='vycviky') }}">Moduly výcviku</a>
+      {% endif %}
       <a href="{{ url_for('create_table') }}">+ Nová tabulka</a>
       <a href="{{ url_for('sql_console') }}">SQL dotazy</a>
     </nav>
     <h3>Tabulky</h3>
     <ul class="table-list">
       {% for t in all_tables %}
-        <li><a href="{{ url_for('view_table', table=t) }}" {% if t == table %}class="active"{% endif %}>{{ t }}</a></li>
+        <li><a href="{{ url_for('view_table', table=t) }}" {% if t == table %}class="active"{% endif %}>{{ t|pretty }}</a></li>
       {% else %}
         <li class="muted">Zatím žádné</li>
       {% endfor %}

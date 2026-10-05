@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}{{ officer.jmeno }} · výcvik{% endblock %}
+{% block content %}
+<div class="header">
+  <h1>{{ officer.jmeno or '—' }} <span class="muted">{{ officer.volacka or '' }}</span></h1>
+  <div class="toolbar">
+    <a class="btn" href="{{ url_for('edit_row', table='dustojnici', row_id=officer.id) }}">Upravit důstojníka</a>
+    <a class="btn" href="{{ url_for('training') }}">‹ Přehled výcviku</a>
+  </div>
+</div>
+<div class="officer-card panel">
+  <div><small>Hodnost</small><b>{{ officer.hodnost_nazev or '—' }}</b></div>
+  <div><small>Oddělení</small><b>{{ officer.oddeleni or '—' }}</b></div>
+  <div><small>Stav</small><b>{{ officer.stav or '—' }}</b></div>
+  <div><small>Nástup</small><b>{{ officer.nastup or '—' }}</b></div>
+  <div class="grow"><small>Splněno {{ completed }}/{{ total }} modulů</small>
+    <div class="progress"><div style="width: {{ (100 * completed / total)|round|int if total else 0 }}%"></div></div>
+  </div>
+</div>
+<div class="modules">
+  {% for kategorie, modules in groups.items() %}
+  <div class="panel">
+    <h3>{{ kategorie }} <span class="muted">{{ modules|selectattr('splneno')|list|length }}/{{ modules|length }}</span></h3>
+    <ul class="module-list">
+      {% for m in modules %}
+      <li class="{{ 'done' if m.splneno else ('failed' if m.splneno is not none else '') }}">
+        <span class="check">{{ '✔' if m.splneno else ('✘' if m.splneno is not none else '○') }}</span>
+        <span class="name">{{ m.nazev }}</span>
+        {% if m.splneno is not none %}
+          <span class="meta">{{ m.datum or '' }}{% if m.body is not none %} · {{ m.body }} b.{% endif %}{% if m.instruktor %} · {{ m.instruktor }}{% endif %}</span>
+        {% endif %}
+        {% if not m.splneno %}
+          <a class="btn small" href="{{ url_for('add_row', table='absolvovane_vycviky', dustojnik=officer.id, vycvik=m.id, splneno=1, next=url_for('officer_training', officer_id=officer.id)) }}">Zapsat</a>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

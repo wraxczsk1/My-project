@@ -3,11 +3,13 @@ import io
 import os
 import re
 import sqlite3
+from datetime import datetime
 
 from flask import (
     Flask,
     Response,
     abort,
+    current_app,
     flash,
     g,
     redirect,
@@ -16,16 +18,28 @@ from flask import (
     url_for,
 )
 
+from lspd_seed import seed_lspd
+
 COLUMN_TYPES = {
     "TEXT": "Text",
     "INTEGER": "Celé číslo",
     "REAL": "Desetinné číslo",
     "DATE": "Datum",
+    "DATETIME": "Datum a čas",
     "BOOLEAN": "Ano/Ne",
 }
 IDENTIFIER_RE = re.compile(r"^[^\W\d]\w{0,62}$")
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+DATETIME_RE = re.compile(r"^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}(:\d{2})?$")
 PAGE_SIZE = 25
+DISPLAY_NAMES = {
+    "dustojnici": "Důstojníci", "absolvovane_vycviky": "Absolvované výcviky",
+    "vycviky": "Výcviky", "sluzby": "Služby", "jmeno": "Jméno", "volacka": "Volačka",
+    "oddeleni": "Oddělení", "nastup": "Nástup", "nazev": "Název", "poradi": "Pořadí",
+    "povinny": "Povinný", "dustojnik": "Důstojník", "vycvik": "Výcvik",
+    "splneno": "Splněno", "poznamka": "Poznámka", "zacatek": "Začátek",
+}
+LSPD_TABLES = ("hodnosti", "kategorie", "vycviky", "dustojnici", "absolvovane_vycviky", "sluzby")
 
 
 def create_app(test_config=None):
@@ -35,22 +49,32 @@ def create_app(test_config=None):
         DATABASE=os.environ.get(
             "DATABASE_PATH", os.path.join(app.instance_path, "database.sqlite")
         ),
+        SEED_LSPD=True,
+        SEED_DEMO=True,
     )
     if test_config:
         app.config.update(test_config)
     os.makedirs(os.path.dirname(os.path.abspath(app.config["DATABASE"])), exist_ok=True)
 
     app.teardown_appcontext(close_db)
+    app.add_template_filter(pretty_name, "pretty")
+    if app.config["SEED_LSPD"]:
+        with app.app_context():
+            if "dustojnici" not in list_tables():
+                seed_lspd(get_db(), demo=app.config["SEED_DEMO"])
     register_routes(app)
     return app
 
 
+def pretty_name(name):
+    return DISPLAY_NAMES.get(name) or name.replace("_", " ").capitalize()
+
+
 def get_db():
     if "db" not in g:
-        from flask import current_app
-
         g.db = sqlite3.connect(current_app.config["DATABASE"])
         g.db.row_factory = sqlite3.Row
+        g.db.execute("PRAGMA foreign_keys = ON")
     return g.db
 
 
@@ -79,12 +103,46 @@ def table_exists(name):
 
 
 def get_columns(table):
-    rows = get_db().execute(f"PRAGMA table_info({quote(table)})").fetchall()
+    db = get_db()
+    refs = {
+        r["from"]: r["table"]
+        for r in db.execute(f"PRAGMA foreign_key_list({quote(table)})").fetchall()
+    }
+    columns = []
+    for r in db.execute(f"PRAGMA table_info({quote(table)})").fetchall():
+        if r["name"] == "id":
+            continue
+        col = {"name": r["name"], "type": (r["type"] or "TEXT").upper(), "ref": None}
+        if r["name"] in refs:
+            col.update(type="REF", ref=refs[r["name"]])
+        columns.append(col)
+    return columns
+
+
+def referencing_tables(table):
     return [
-        {"name": r["name"], "type": (r["type"] or "TEXT").upper()}
-        for r in rows
-        if r["name"] != "id"
+        t for t in list_tables()
+        if t != table and any(c["ref"] == table for c in get_columns(t))
     ]
+
+
+def label_column(table):
+    for c in get_columns(table):
+        if c["type"] == "TEXT":
+            return c["name"]
+    return "id"
+
+
+def ref_options(table):
+    label = label_column(table)
+    rows = get_db().execute(
+        f"SELECT id, {quote(label)} AS label FROM {quote(table)} ORDER BY id"
+    ).fetchall()
+    return {r["id"]: (r["label"] if r["label"] is not None else f"#{r['id']}") for r in rows}
+
+
+def ref_maps(columns):
+    return {c["ref"]: ref_options(c["ref"]) for c in columns if c["ref"]}
 
 
 def require_table(table):
@@ -99,7 +157,7 @@ def convert_value(raw, col_type):
     if raw is None or str(raw).strip() == "":
         return None
     raw = str(raw).strip()
-    if col_type == "INTEGER":
+    if col_type in ("INTEGER", "REF"):
         try:
             return int(raw)
         except ValueError:
@@ -113,6 +171,10 @@ def convert_value(raw, col_type):
         if not DATE_RE.match(raw):
             raise ValueError(f"„{raw}“ není datum ve formátu RRRR-MM-DD")
         return raw
+    if col_type == "DATETIME":
+        if not DATETIME_RE.match(raw):
+            raise ValueError(f"„{raw}“ není datum a čas ve formátu RRRR-MM-DD HH:MM")
+        return raw.replace("T", " ")[:16]
     return raw
 
 
@@ -140,6 +202,7 @@ def insert_row(table, values):
 def parse_column_defs(form):
     names = form.getlist("col_name")
     types = form.getlist("col_type")
+    tables = list_tables()
     columns, seen = [], set()
     for name, col_type in zip(names, types):
         name = name.strip()
@@ -149,17 +212,69 @@ def parse_column_defs(form):
             raise ValueError(f"Neplatný název sloupce: „{name}“")
         if name.lower() in seen:
             raise ValueError(f"Duplicitní sloupec: „{name}“")
-        if col_type not in COLUMN_TYPES:
+        if col_type.startswith("REF:"):
+            target = col_type[4:]
+            if target not in tables:
+                raise ValueError(f"Odkazovaná tabulka „{target}“ neexistuje")
+            sql_type = f"INTEGER REFERENCES {quote(target)}(id) ON DELETE SET NULL"
+        elif col_type in COLUMN_TYPES:
+            sql_type = col_type
+        else:
             raise ValueError(f"Neplatný typ sloupce: „{col_type}“")
         seen.add(name.lower())
-        columns.append((name, col_type))
+        columns.append((name, sql_type))
     return columns
+
+
+def now_str():
+    return datetime.now().strftime("%Y-%m-%d %H:%M")
+
+
+def lspd_ready():
+    tables = set(list_tables())
+    return all(t in tables for t in LSPD_TABLES)
+
+
+def training_overview(db):
+    categories = db.execute(
+        'SELECT k.id, k."nazev", COUNT(v.id) AS total FROM "kategorie" k '
+        'LEFT JOIN "vycviky" v ON v."kategorie" = k.id '
+        'GROUP BY k.id ORDER BY k."poradi", k.id'
+    ).fetchall()
+    officers = db.execute(
+        'SELECT d.id, d."jmeno", d."volacka", d."stav", h."nazev" AS hodnost '
+        'FROM "dustojnici" d LEFT JOIN "hodnosti" h ON h.id = d."hodnost" '
+        'ORDER BY h."poradi" DESC, d."jmeno"'
+    ).fetchall()
+    done = {}
+    for r in db.execute(
+        'SELECT a."dustojnik", v."kategorie", COUNT(DISTINCT a."vycvik") AS n '
+        'FROM "absolvovane_vycviky" a JOIN "vycviky" v ON v.id = a."vycvik" '
+        'WHERE a."splneno" = 1 GROUP BY a."dustojnik", v."kategorie"'
+    ):
+        done[(r["dustojnik"], r["kategorie"])] = r["n"]
+    total = sum(c["total"] for c in categories)
+    rows = []
+    for o in officers:
+        per_cat = [done.get((o["id"], c["id"]), 0) for c in categories]
+        completed = sum(per_cat)
+        rows.append({
+            "officer": o,
+            "per_cat": per_cat,
+            "completed": completed,
+            "percent": round(100 * completed / total) if total else 0,
+        })
+    return categories, rows, total
 
 
 def register_routes(app):
     @app.context_processor
     def inject_globals():
-        return {"all_tables": list_tables(), "column_types": COLUMN_TYPES}
+        return {
+            "all_tables": list_tables(),
+            "column_types": COLUMN_TYPES,
+            "lspd": lspd_ready(),
+        }
 
     @app.route("/")
     def index():
@@ -172,7 +287,126 @@ def register_routes(app):
             }
             for t in list_tables()
         ]
-        return render_template("index.html", tables=tables)
+        stats, on_duty, recent, officers = None, [], [], {}
+        if lspd_ready():
+            one = lambda sql: db.execute(sql).fetchone()[0]  # noqa: E731
+            stats = {
+                "officers": one('SELECT COUNT(*) FROM "dustojnici"'),
+                "cadets": one(
+                    'SELECT COUNT(*) FROM "dustojnici" d JOIN "hodnosti" h '
+                    'ON h.id = d."hodnost" WHERE h."zkratka" = \'CDT\''
+                ),
+                "on_duty": one('SELECT COUNT(*) FROM "sluzby" WHERE "konec" IS NULL'),
+                "trainings": one(
+                    'SELECT COUNT(*) FROM "absolvovane_vycviky" WHERE "splneno" = 1'
+                ),
+            }
+            on_duty = db.execute(
+                'SELECT s.id, s."zacatek", s."unit", d."jmeno", d."volacka", '
+                'p."jmeno" AS partner FROM "sluzby" s '
+                'LEFT JOIN "dustojnici" d ON d.id = s."dustojnik" '
+                'LEFT JOIN "dustojnici" p ON p.id = s."partner" '
+                'WHERE s."konec" IS NULL ORDER BY s."zacatek"'
+            ).fetchall()
+            recent = db.execute(
+                'SELECT a."datum", a."body", a."splneno", d."jmeno", v."nazev" AS vycvik, '
+                'i."jmeno" AS instruktor FROM "absolvovane_vycviky" a '
+                'LEFT JOIN "dustojnici" d ON d.id = a."dustojnik" '
+                'LEFT JOIN "vycviky" v ON v.id = a."vycvik" '
+                'LEFT JOIN "dustojnici" i ON i.id = a."instruktor" '
+                'ORDER BY a."datum" DESC, a.id DESC LIMIT 8'
+            ).fetchall()
+            officers = ref_options("dustojnici")
+        return render_template(
+            "index.html", tables=tables, stats=stats, on_duty=on_duty,
+            recent=recent, officers=officers,
+        )
+
+    @app.post("/sluzba/start")
+    def duty_start():
+        if not lspd_ready():
+            abort(404)
+        try:
+            officer = convert_value(request.form.get("dustojnik"), "REF")
+            partner = convert_value(request.form.get("partner"), "REF")
+        except ValueError as exc:
+            flash(str(exc), "error")
+            return redirect(url_for("index"))
+        if officer is None:
+            flash("Vyber důstojníka", "error")
+            return redirect(url_for("index"))
+        db = get_db()
+        if db.execute(
+            'SELECT 1 FROM "sluzby" WHERE "dustojnik" = ? AND "konec" IS NULL', [officer]
+        ).fetchone():
+            flash("Důstojník už je ve službě", "error")
+            return redirect(url_for("index"))
+        try:
+            insert_row("sluzby", {
+                "dustojnik": officer,
+                "zacatek": now_str(),
+                "unit": request.form.get("unit", "").strip() or None,
+                "partner": partner,
+            })
+            db.commit()
+        except sqlite3.IntegrityError:
+            flash("Neexistující důstojník", "error")
+            return redirect(url_for("index"))
+        flash("Služba zahájena", "success")
+        return redirect(url_for("index"))
+
+    @app.post("/sluzba/<int:shift_id>/end")
+    def duty_end(shift_id):
+        if not lspd_ready():
+            abort(404)
+        db = get_db()
+        db.execute(
+            'UPDATE "sluzby" SET "konec" = ? WHERE id = ? AND "konec" IS NULL',
+            [now_str(), shift_id],
+        )
+        db.commit()
+        flash("Služba ukončena", "success")
+        return redirect(url_for("index"))
+
+    @app.route("/vycvik")
+    def training():
+        if not lspd_ready():
+            abort(404)
+        categories, rows, total = training_overview(get_db())
+        return render_template("training.html", categories=categories, rows=rows, total=total)
+
+    @app.route("/vycvik/<int:officer_id>")
+    def officer_training(officer_id):
+        if not lspd_ready():
+            abort(404)
+        db = get_db()
+        officer = db.execute(
+            'SELECT d.*, h."nazev" AS hodnost_nazev FROM "dustojnici" d '
+            'LEFT JOIN "hodnosti" h ON h.id = d."hodnost" WHERE d.id = ?',
+            [officer_id],
+        ).fetchone()
+        if officer is None:
+            abort(404)
+        modules = db.execute(
+            'SELECT v.id, v."nazev", v."povinny", k."nazev" AS kategorie, '
+            'a."datum", a."body", a."splneno", i."jmeno" AS instruktor '
+            'FROM "vycviky" v LEFT JOIN "kategorie" k ON k.id = v."kategorie" '
+            'LEFT JOIN "absolvovane_vycviky" a ON a.id = ('
+            '  SELECT a2.id FROM "absolvovane_vycviky" a2 '
+            '  WHERE a2."vycvik" = v.id AND a2."dustojnik" = ? '
+            '  ORDER BY a2."splneno" DESC, a2."datum" DESC, a2.id DESC LIMIT 1) '
+            'LEFT JOIN "dustojnici" i ON i.id = a."instruktor" '
+            'ORDER BY k."poradi", k.id, v.id',
+            [officer_id],
+        ).fetchall()
+        groups = {}
+        for m in modules:
+            groups.setdefault(m["kategorie"] or "Bez kategorie", []).append(m)
+        completed = sum(1 for m in modules if m["splneno"])
+        return render_template(
+            "officer.html", officer=officer, groups=groups,
+            completed=completed, total=len(modules),
+        )
 
     @app.route("/tables/new", methods=["GET", "POST"])
     def create_table():
@@ -211,11 +445,18 @@ def register_routes(app):
         page = max(request.args.get("page", 1, type=int), 1)
 
         where, params = "", []
-        if q and col_names:
-            where = "WHERE " + " OR ".join(
-                f"CAST({quote(c)} AS TEXT) LIKE ?" for c in ["id", *col_names]
-            )
-            params = [f"%{q}%"] * (len(col_names) + 1)
+        if q:
+            conds = ['CAST("id" AS TEXT) LIKE ?']
+            for c in columns:
+                if c["ref"]:
+                    conds.append(
+                        f"{quote(c['name'])} IN (SELECT id FROM {quote(c['ref'])} "
+                        f"WHERE CAST({quote(label_column(c['ref']))} AS TEXT) LIKE ?)"
+                    )
+                else:
+                    conds.append(f"CAST({quote(c['name'])} AS TEXT) LIKE ?")
+            where = "WHERE " + " OR ".join(conds)
+            params = [f"%{q}%"] * len(conds)
 
         db = get_db()
         total = db.execute(
@@ -232,6 +473,7 @@ def register_routes(app):
             "table.html",
             table=table,
             columns=columns,
+            refs=ref_maps(columns),
             rows=rows,
             q=q,
             sort=sort,
@@ -241,22 +483,30 @@ def register_routes(app):
             total=total,
         )
 
+    def render_row_form(table, columns, row, row_id=None, status=200):
+        return render_template(
+            "row_form.html", table=table, columns=columns, row=row,
+            row_id=row_id, refs=ref_maps(columns),
+        ), status
+
     @app.route("/t/<table>/add", methods=["GET", "POST"])
     def add_row(table):
         columns = require_table(table)
         if request.method == "POST":
             values, errors = values_from_form(columns, request.form)
+            if not errors:
+                try:
+                    insert_row(table, values)
+                    get_db().commit()
+                except sqlite3.IntegrityError as exc:
+                    errors.append(f"Neplatný odkaz: {exc}")
             if errors:
                 for e in errors:
                     flash(e, "error")
-                return render_template(
-                    "row_form.html", table=table, columns=columns, row=request.form
-                ), 400
-            insert_row(table, values)
-            get_db().commit()
+                return render_row_form(table, columns, request.form, status=400)
             flash("Záznam přidán", "success")
-            return redirect(url_for("view_table", table=table))
-        return render_template("row_form.html", table=table, columns=columns, row={})
+            return redirect(request.args.get("next") or url_for("view_table", table=table))
+        return render_row_form(table, columns, request.args)
 
     @app.route("/t/<table>/<int:row_id>/edit", methods=["GET", "POST"])
     def edit_row(table, row_id):
@@ -269,29 +519,24 @@ def register_routes(app):
             abort(404)
         if request.method == "POST":
             values, errors = values_from_form(columns, request.form)
+            if not errors and values:
+                try:
+                    db.execute(
+                        f"UPDATE {quote(table)} SET "
+                        + ", ".join(f"{quote(c)} = ?" for c in values)
+                        + " WHERE id = ?",
+                        [*values.values(), row_id],
+                    )
+                    db.commit()
+                except sqlite3.IntegrityError as exc:
+                    errors.append(f"Neplatný odkaz: {exc}")
             if errors:
                 for e in errors:
                     flash(e, "error")
-                return render_template(
-                    "row_form.html",
-                    table=table,
-                    columns=columns,
-                    row=request.form,
-                    row_id=row_id,
-                ), 400
-            if values:
-                db.execute(
-                    f"UPDATE {quote(table)} SET "
-                    + ", ".join(f"{quote(c)} = ?" for c in values)
-                    + " WHERE id = ?",
-                    [*values.values(), row_id],
-                )
-                db.commit()
+                return render_row_form(table, columns, request.form, row_id, 400)
             flash("Záznam uložen", "success")
             return redirect(url_for("view_table", table=table))
-        return render_template(
-            "row_form.html", table=table, columns=columns, row=row, row_id=row_id
-        )
+        return render_row_form(table, columns, row, row_id)
 
     @app.post("/t/<table>/<int:row_id>/delete")
     def delete_row(table, row_id):
@@ -315,8 +560,8 @@ def register_routes(app):
             flash(str(exc), "error")
             return redirect(url_for("view_table", table=table))
         db = get_db()
-        for name, col_type in new:
-            db.execute(f"ALTER TABLE {quote(table)} ADD COLUMN {quote(name)} {col_type}")
+        for name, sql_type in new:
+            db.execute(f"ALTER TABLE {quote(table)} ADD COLUMN {quote(name)} {sql_type}")
         db.commit()
         if new:
             flash("Sloupec přidán", "success")
@@ -325,6 +570,13 @@ def register_routes(app):
     @app.post("/t/<table>/delete")
     def drop_table(table):
         require_table(table)
+        users = referencing_tables(table)
+        if users:
+            flash(
+                f"Tabulku „{table}“ nelze smazat, odkazují na ni: {', '.join(users)}",
+                "error",
+            )
+            return redirect(url_for("view_table", table=table))
         db = get_db()
         db.execute(f"DROP TABLE {quote(table)}")
         db.commit()
@@ -366,10 +618,10 @@ def register_routes(app):
         for line, rec in enumerate(reader, start=2):
             try:
                 values = {h: convert_value(rec.get(h), known[h]["type"]) for h in usable}
-            except ValueError as exc:
+                insert_row(table, values)
+            except (ValueError, sqlite3.IntegrityError) as exc:
                 errors.append(f"Řádek {line}: {exc}")
                 continue
-            insert_row(table, values)
             count += 1
         db.commit()
         flash(f"Importováno {count} záznamů", "success")

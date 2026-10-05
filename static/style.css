@@ -1,14 +1,16 @@
 :root {
   --bg: #f5f6fa; --panel: #fff; --text: #1f2430; --muted: #6b7280;
-  --border: #e3e5ec; --primary: #2563eb; --danger: #dc2626; --sidebar: #1e2533;
+  --border: #e3e5ec; --primary: #1d4ed8; --danger: #dc2626; --sidebar: #0b1a33; --gold: #d4a017; --ok: #17803d;
 }
 * { box-sizing: border-box; }
 body { margin: 0; display: flex; align-items: flex-start; min-height: 100vh; font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); }
 a { color: var(--primary); text-decoration: none; }
 .sidebar { width: 230px; flex-shrink: 0; background: var(--sidebar); color: #cbd2e0; padding: 20px 14px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
 .sidebar a { color: #cbd2e0; display: block; padding: 6px 10px; border-radius: 6px; }
-.sidebar a:hover, .sidebar a.active { background: #2e3850; color: #fff; }
-.brand { font-size: 22px; font-weight: 700; color: #fff !important; margin-bottom: 14px; }
+.sidebar a:hover, .sidebar a.active { background: #1a2d52; color: #fff; }
+.brand { font-size: 22px; font-weight: 800; color: #fff !important; margin-bottom: 14px; letter-spacing: .04em; }
+.brand small { display: block; color: var(--gold); font-weight: 600; font-size: 14px; letter-spacing: 0; }
+.brand .badge { color: var(--gold); }
 .sidebar h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: #8892a6; margin: 22px 10px 6px; }
 .table-list { list-style: none; padding: 0; margin: 0; }
 main { flex: 1; padding: 28px 36px; min-width: 0; }
@@ -59,3 +61,36 @@ td.type-integer, td.type-real { text-align: right; font-variant-numeric: tabular
 .row-actions form { margin: 0; }
 .pagination { display: flex; gap: 12px; align-items: center; justify-content: center; margin-top: 14px; }
 code { background: #eef0f5; padding: 1px 5px; border-radius: 4px; }
+
+.section { font-size: 18px; margin: 28px 0 12px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; margin-bottom: 18px; }
+.stat { background: var(--panel); border: 1px solid var(--border); border-left: 4px solid var(--primary); border-radius: 10px; padding: 14px 18px; color: var(--text); }
+.stat b { display: block; font-size: 30px; line-height: 1.1; }
+.stat span { color: var(--muted); }
+.stat.live { border-left-color: var(--ok); }
+.panels.two { grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); margin-top: 0; }
+table.data.compact th, table.data.compact td { padding: 6px 8px; }
+.panel table.data { margin-bottom: 12px; }
+.duty-form { display: flex; gap: 8px; flex-wrap: wrap; }
+.duty-form select, .duty-form input { width: auto !important; flex: 1 1 140px; margin-top: 0 !important; }
+.pill { display: inline-block; padding: 1px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; background: #eef0f5; color: var(--muted); }
+.pill.ok { background: #e7f6ec; color: var(--ok); }
+.pill.part { background: #fff4d6; color: #8a6100; }
+.pill.no { background: #f1f2f6; color: #8b92a3; }
+.progress { height: 8px; background: #e8eaf0; border-radius: 999px; overflow: hidden; min-width: 120px; margin: 4px 0; }
+.progress div { height: 100%; background: linear-gradient(90deg, var(--primary), var(--gold)); }
+table.matrix th small { white-space: nowrap; }
+.officer-card { display: flex; gap: 28px; flex-wrap: wrap; align-items: center; }
+.officer-card small { display: block; color: var(--muted); }
+.officer-card .grow { flex: 1; min-width: 200px; }
+.modules { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; }
+.module-list { list-style: none; padding: 0; margin: 0; }
+.module-list li { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--border); }
+.module-list li:last-child { border-bottom: 0; }
+.module-list .check { width: 18px; color: #b0b6c3; font-weight: 700; }
+.module-list li.done .check { color: var(--ok); }
+.module-list li.failed .check { color: var(--danger); }
+.module-list .name { flex: 1; }
+.module-list .meta { color: var(--muted); font-size: 12px; }
+table.data.compact td, table.matrix th { white-space: normal; }
+.panel { min-width: 0; overflow-x: auto; }

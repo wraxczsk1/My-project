@@ -7,7 +7,9 @@ from app import create_app
 
 @pytest.fixture
 def client(tmp_path):
-    app = create_app({"TESTING": True, "DATABASE": str(tmp_path / "test.sqlite")})
+    app = create_app(
+        {"TESTING": True, "DATABASE": str(tmp_path / "test.sqlite"), "SEED_LSPD": False}
+    )
     return app.test_client()
 
 
@@ -96,3 +98,51 @@ def test_sql_console_is_read_only(client):
     page = client.post("/sql", data={"query": "DELETE FROM hraci"}).get_data(as_text=True)
     assert "readonly" in page
     assert "Eva" in client.get("/t/hraci").get_data(as_text=True)
+
+
+@pytest.fixture
+def lspd(tmp_path):
+    app = create_app({"TESTING": True, "DATABASE": str(tmp_path / "lspd.sqlite")})
+    return app.test_client()
+
+
+def test_lspd_seed_and_pages(lspd):
+    page = lspd.get("/").get_data(as_text=True)
+    assert "Ve službě" in page and "Sarah Connor" in page
+    page = lspd.get("/vycvik").get_data(as_text=True)
+    assert "Základy služby" in page and "Kriminalistika" in page
+    page = lspd.get("/vycvik/3").get_data(as_text=True)
+    assert "Felony stop" in page and "Poučení před interakcí" in page
+    assert lspd.get("/t/vycviky").get_data(as_text=True).count("Základy služby") >= 9
+
+
+def test_ref_columns_show_labels_and_validate(lspd):
+    page = lspd.get("/t/dustojnici?q=Sergeant").get_data(as_text=True)
+    assert "John Miller" in page and "Jakub Novák" not in page
+    r = lspd.post("/t/sluzby/add", data={"dustojnik": "999", "zacatek": "2026-10-05T10:00"})
+    assert r.status_code == 400 and "Neplatný odkaz" in r.get_data(as_text=True)
+    page = lspd.get("/t/absolvovane_vycviky/add?dustojnik=3&vycvik=5").get_data(as_text=True)
+    assert '<option value="3" selected>' in page
+
+
+def test_duty_start_and_end(lspd):
+    lspd.post("/sluzba/start", data={"dustojnik": "1", "unit": "1-ADAM-01"})
+    page = lspd.get("/").get_data(as_text=True)
+    assert "1-ADAM-01" in page
+    r = lspd.post("/sluzba/start", data={"dustojnik": "1"}, follow_redirects=True)
+    assert "už je ve službě" in r.get_data(as_text=True)
+    lspd.post("/sluzba/2/end")
+    lspd.post("/sluzba/1/end")
+    assert "Nikdo není ve službě" in lspd.get("/").get_data(as_text=True)
+
+
+def test_cannot_drop_referenced_table(lspd):
+    r = lspd.post("/t/dustojnici/delete", follow_redirects=True)
+    assert "nelze smazat" in r.get_data(as_text=True)
+    assert lspd.get("/t/dustojnici").status_code == 200
+
+
+def test_add_ref_column(lspd):
+    lspd.post("/t/sluzby/columns", data={"col_name": ["vozidlo_ridic"], "col_type": ["REF:dustojnici"]})
+    page = lspd.get("/t/sluzby").get_data(as_text=True)
+    assert "→ dustojnici" in page
