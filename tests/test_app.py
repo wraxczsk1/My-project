@@ -32,7 +32,7 @@ def test_category_and_module_pages(client):
 
 def test_module_shows_images_and_video(client):
     page = client.get("/k/dopravni-postupy/felony-stop").get_data(as_text=True)
-    assert "manual/felony-stop.png" in page
+    assert "/obrazky/felony-stop.png" in page
     page = client.get("/k/dopravni-postupy/radar").get_data(as_text=True)
     assert "medal.tv" in page
 

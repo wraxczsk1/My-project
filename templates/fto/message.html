@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<section class="fto-card fto-narrow">
+  <span class="fto-tag">FTO MANAGE</span>
+  <h1>{{ title }}</h1>
+  <p>{{ text }}</p>
+  <a class="btn" href="{{ url_for('index') }}">← Zpět na manuál</a>
+</section>
+{% endblock %}

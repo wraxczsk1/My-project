@@ -1,10 +1,15 @@
 import io
+import os
+import secrets
 import zipfile
 from collections import Counter
 from functools import lru_cache
 
-from flask import Flask, Response, abort, render_template, request
+from flask import Flask, Response, abort, render_template, request, send_file
+from werkzeug.middleware.proxy_fix import ProxyFix
 
+import fto
+import manual_store as store
 from manual_content import MANUAL
 from manual_png import CODE_COLORS, CODE_LABELS, image_path, module_pages, overview_png, parse
 
@@ -67,8 +72,34 @@ def module_preview(ci, mi, m):
     }
 
 
-def create_app():
+@store.on_change
+def clear_caches():
+    module_pages.cache_clear()
+    overview_png.cache_clear()
+    manual_zip_bytes.cache_clear()
+
+
+def secret_key():
+    if os.environ.get("SECRET_KEY"):
+        return os.environ["SECRET_KEY"]
+    path = store.path("secret_key")
+    if not os.path.isfile(path):
+        os.makedirs(store.data_dir, exist_ok=True)
+        with open(path, "w") as fh:
+            fh.write(secrets.token_hex(32))
+    with open(path) as fh:
+        return fh.read().strip()
+
+
+def create_app(config=None):
     app = Flask(__name__)
+    app.config.update(MAX_CONTENT_LENGTH=20 * 1024 * 1024, SESSION_COOKIE_SAMESITE="Lax", **(config or {}))
+    if app.config.get("DATA_DIR"):
+        store.configure(app.config["DATA_DIR"])
+    app.secret_key = secret_key()
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+    store.load()
+    fto.init_app(app)
 
     @app.context_processor
     def inject_manual():
@@ -104,6 +135,13 @@ def create_app():
             "module.html", c=c, ci=ci, m=m, mi=mi, blocks=blocks, images=images, code_counts=code_counts,
             pages=len(module_pages(ci, mi)), prev_m=prev_m, next_m=next_m, active_cat=c["slug"],
         )
+
+    @app.route("/obrazky/<name>")
+    def image(name):
+        path = image_path(name)
+        if not path:
+            abort(404)
+        return send_file(path, max_age=3600)
 
     @app.route("/png/obsah.png")
     def overview_image():

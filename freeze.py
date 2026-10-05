@@ -22,6 +22,10 @@ def page_urls():
 def file_urls():
     yield "/png/obsah.png"
     yield "/lspd-manual.zip"
+    for c in MANUAL:
+        for m in c["moduly"]:
+            for name in m["obrazky"]:
+                yield f"/obrazky/{name}"
     for ci, c in enumerate(MANUAL):
         for mi, m in enumerate(c["moduly"]):
             for page in range(1, len(module_pages(ci, mi)) + 1):
@@ -33,6 +37,7 @@ def build(out):
     if out.exists():
         shutil.rmtree(out)
     shutil.copytree(Path(app.root_path) / "static", out / "static")
+    app.config["STATIC_BUILD"] = True
     client = app.test_client()
     for url in page_urls():
         resp = client.get(url)

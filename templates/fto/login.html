@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}FTO přihlášení{% endblock %}
+{% block content %}
+<section class="fto-card fto-narrow">
+  <span class="fto-tag">FTO MANAGE</span>
+  <h1>Přihlášení FTO</h1>
+  <p>Správa kurzů a lekcí je jen pro Field Training Officery s povoleným Google účtem.</p>
+  <a class="btn gold" href="{{ url_for('fto.login', go=1) }}">Přihlásit přes Google</a>
+</section>
+{% endblock %}

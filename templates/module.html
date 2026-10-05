@@ -82,7 +82,7 @@
       {% endif %}
     {% endfor %}
     {% for name in images %}
-      <img class="lesson-img" src="{{ url_for('static', filename='manual/' ~ name) }}" alt="{{ m.nazev }}">
+      <img class="lesson-img" src="{{ url_for('image', name=name) }}" alt="{{ m.nazev }}">
     {% endfor %}
     {% if m.video %}
       <a class="video" href="{{ m.video }}" target="_blank" rel="noopener noreferrer">▶ Přehrát video ukázku</a>

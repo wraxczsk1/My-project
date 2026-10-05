@@ -1,0 +1,2 @@
+<nav class="crumbs"><a href="{{ url_for('index') }}">Přehled</a><span>/</span><a href="{{ url_for('fto.dashboard') }}">FTO MANAGE</a>{% if crumb %}<span>/</span><b>{{ crumb }}</b>{% endif %}</nav>
+{% with msgs = get_flashed_messages(with_categories=true) %}{% for cat, msg in msgs %}<div class="flash {{ cat }}">{{ msg }}</div>{% endfor %}{% endwith %}

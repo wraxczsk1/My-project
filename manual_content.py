@@ -111,7 +111,7 @@ Hold Fire | Zastavit palbu | info
 """
 
 MANUAL = [
-    kategorie("Základy služby", "📘", "#2563eb", [
+    kategorie("Základy služby", "stit", "#2563eb", [
         modul("Kódy", KODY),
         modul("Miranda", """
 # Kdy se Miranda čte
@@ -234,7 +234,7 @@ John | Sergeant | info
 Lincoln | Police Officers | info
 """),
     ]),
-    kategorie("Radiová komunikace", "📻", "#d97706", [
+    kategorie("Radiová komunikace", "vysilacka", "#d97706", [
         modul("Frekvence", """
 Vysílačkou se policisté a další složky domlouvají stručně a rychle na dálku.
 # Frekvence
@@ -284,7 +284,7 @@ Pkwy | Parkway | info
 ETA | Estimated time of arrival – čas příjezdu | info
 """),
     ]),
-    kategorie("Zdravověda", "🚑", "#dc2626", [
+    kategorie("Zdravověda", "kriz", "#dc2626", [
         modul("KPR", """
 Kardiopulmonální resuscitace – oddálení klinické smrti.
 # Postup
@@ -374,7 +374,7 @@ Nástroje | nůžky, pean, pinzeta, Magillovy kleště | info
 - Odhal pacienta podle typu poranění
 """, obrazky=["abcde.png"]),
     ]),
-    kategorie("Dopravní postupy", "🚓", "#0891b2", [
+    kategorie("Dopravní postupy", "auto", "#0891b2", [
         modul("Traffic stop", """
 Zastavení vozidla a dočasné zadržení řidiče kvůli přestupku nebo TČ.
 - Zaparkuj za vozidlem, nech Code 2
@@ -428,7 +428,7 @@ Pursuit Immobilization Technique – náraz do zadní nápravy, vůz dostane smy
 - Postup je ukázaný ve videu
 """, video="https://medal.tv/games/gta-v/clips/m0NcXWcFkxxWORHLO?invite=cr-MSw0dnAsMTQ5Mzg0OTQ3&v=107"),
     ]),
-    kategorie("Evidence a MDT", "💻", "#7c3aed", [
+    kategorie("Evidence a MDT", "mdt", "#7c3aed", [
         modul("MDT zapisování", """
 MDT (Mobile Data Terminal) je hlavní databáze pro práci v terénu.
 # Sekce
@@ -507,7 +507,7 @@ BOLO | Pátrání po osobě / vozidle | dispatch
 - Callsign, přidělené vozidlo, ztlumení zvuků
 """, obrazky=["dispatch-mapa.png", "dispatch-nastaveni.png"]),
     ]),
-    kategorie("Taktika a zásah", "🎯", "#ea580c", [
+    kategorie("Taktika a zásah", "zamerovac", "#ea580c", [
         modul("10-13", """
 10-13 = hlášení o střelbě. Vždy nebezpečný call – jedou jednotky s vestami a těžšími zbraněmi.
 ! Cadet nereaguje, pokud není přímo zavolán na podporu
@@ -571,7 +571,7 @@ Vymezený prostor kolem zásahu, do kterého nesmí nepovolané osoby.
 - Velikost 60–100, trvání 10–30 min
 """),
     ]),
-    kategorie("Kriminalistika", "🔍", "#16a34a", [
+    kategorie("Kriminalistika", "lupa", "#16a34a", [
         modul("Klíčová slova", """
 Kriminalistika chrání občany vyhledáváním a zkoumáním stop a důkazů.
 # Pojmy

@@ -4,6 +4,7 @@ from functools import lru_cache
 
 from PIL import Image, ImageDraw, ImageFont
 
+import manual_store
 from manual_content import MANUAL
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -87,8 +88,11 @@ def parse(text):
 
 
 def image_path(name):
-    path = os.path.join(IMG_DIR, os.path.basename(name))
-    return path if os.path.isfile(path) else None
+    for folder in (IMG_DIR, manual_store.upload_dir()):
+        path = os.path.join(folder, os.path.basename(name))
+        if os.path.isfile(path):
+            return path
+    return None
 
 
 def mix(color, other, t):

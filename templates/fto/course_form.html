@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Upravit kurz' if c else 'Nový kurz' }}{% endblock %}
+{% block content %}
+{% set crumb = c.nazev if c else 'Nový kurz' %}{% include "fto/_head.html" %}
+<form class="fto-card fto-form" method="post">
+  <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+  <span class="fto-tag">FTO MANAGE</span>
+  <h1>{{ 'Upravit kurz' if c else 'Nový kurz' }}</h1>
+  <label>Název kurzu<input name="nazev" value="{{ c.nazev if c }}" required maxlength="60"></label>
+  <label>Barva kurzu<input type="color" name="barva" value="{{ c.barva if c else '#2563eb' }}"></label>
+  <fieldset><legend>Ikona</legend>
+    <div class="icon-pick">
+    {% for key, label in icons.items() %}
+      <label style="--cat: {{ c.barva if c else '#2563eb' }}"><input type="radio" name="ikona" value="{{ key }}" {{ 'checked' if (c.ikona if c else 'stit') == key }}>
+        <span class="course-icon">{% with c={'ikona': key} %}{% include "_icon.html" %}{% endwith %}</span><small>{{ label }}</small></label>
+    {% endfor %}
+    </div>
+  </fieldset>
+  <div class="fto-actions"><button class="btn gold">Uložit kurz</button><a class="btn" href="{{ url_for('fto.dashboard') }}">Zrušit</a></div>
+</form>
+{% endblock %}
