@@ -5,3 +5,4 @@ instance/
 *.sqlite
 .pytest_cache/
 dist/
+.env

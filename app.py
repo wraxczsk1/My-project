@@ -91,7 +91,17 @@ def secret_key():
         return fh.read().strip()
 
 
+def load_env_file(path=os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")):
+    if os.path.isfile(path):
+        with open(path, encoding="utf-8") as fh:
+            for line in fh:
+                key, sep, value = line.strip().partition("=")
+                if sep and not key.startswith("#"):
+                    os.environ.setdefault(key.strip(), value.strip())
+
+
 def create_app(config=None):
+    load_env_file()
     app = Flask(__name__)
     app.config.update(MAX_CONTENT_LENGTH=20 * 1024 * 1024, SESSION_COOKIE_SAMESITE="Lax", **(config or {}))
     if app.config.get("DATA_DIR"):

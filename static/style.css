@@ -354,7 +354,7 @@ main { flex: 1; min-width: 0; padding: 34px 38px 60px; max-width: 1420px; }
 .fto-card { background: var(--panel); border: 1px solid var(--border); border-top: 3px solid var(--cat, var(--gold)); padding: 22px 24px; margin: 0 0 18px; }
 .fto-narrow { max-width: 560px; margin: 60px auto; text-align: center; }
 .fto-narrow p { color: var(--muted); margin: 10px 0 22px; }
-.fto-tag { display: inline-block; font-family: var(--head); font-size: 12px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--navy); background: var(--gold); padding: 3px 10px; }
+.fto-tag { align-self: flex-start; display: inline-block; font-family: var(--head); font-size: 12px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--navy); background: var(--gold); padding: 3px 10px; }
 .fto-card h1, .fto-top h1 { font-family: var(--head); font-size: 34px; letter-spacing: .04em; text-transform: uppercase; margin: 10px 0 6px; }
 .fto-card h2 { font-family: var(--head); font-size: 24px; text-transform: uppercase; letter-spacing: .04em; margin: 0; }
 .fto-top { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; margin: 0 0 20px; flex-wrap: wrap; }

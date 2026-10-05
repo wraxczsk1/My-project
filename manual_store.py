@@ -9,7 +9,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 OWNER_EMAILS = [e.strip().lower() for e in os.environ.get("FTO_EMAILS", "kudelka.zdenek0@gmail.com").split(",") if e.strip()]
 IMAGE_EXT = {".png", ".jpg", ".jpeg", ".webp"}
 
-data_dir = os.environ.get("LSPD_DATA_DIR") or os.path.join(BASE_DIR, "instance")
+data_dir = os.environ.get("LSPD_DATA_DIR") or ("/data" if os.path.isdir("/data") else os.path.join(BASE_DIR, "instance"))
 _listeners = []
 
 
