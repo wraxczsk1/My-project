@@ -226,7 +226,7 @@ Recepce na služebně je první místo, kam občan přijde. Jednej klidně, slu�
 - Vyslechni důvod návštěvy, nepřerušuj a dělej si poznámky
 # Typické požadavky
 Oznámení | Sepiš Report v MDT, typ Oznámení | info
-Registrace zbraně | ID + WL, postup dle modulu Registrace zbraně | info
+Zbraně | Registrace: ID + WL, postup dle modulu Registrace zbraně | info
 Hledaná osoba | Ověř v MDT, při warrantu zajisti a volej podporu | info
 Vyzvednutí věcí | Ověř totožnost a záznam v MDT | info
 Stížnost na LEO | Předej supervisorovi, sám neřeš | info
