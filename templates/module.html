@@ -1,14 +1,23 @@
 {% extends "base.html" %}
 {% block title %}{{ m.nazev }}{% endblock %}
 {% block content %}
-<section class="banner" style="--cat: {{ c.barva }}">
-  <a class="crumb" href="{{ url_for('category', cat=c.slug) }}">← {{ c.ikona }} {{ c.nazev }}</a>
-  <h1><span class="num big light">{{ mi + 1 }}</span> {{ m.nazev }}</h1>
-  <p>Modul {{ mi + 1 }} z {{ c.moduly|length }}</p>
+<nav class="crumbs">
+  <a href="{{ url_for('index') }}">Přehled</a><span>/</span>
+  <a href="{{ url_for('category', cat=c.slug) }}">Kurz {{ '%02d'|format(ci + 1) }} · {{ c.nazev }}</a><span>/</span>
+  <b>Lekce {{ ci + 1 }}.{{ mi + 1 }}</b>
+</nav>
+<section class="file-head" style="--cat: {{ c.barva }}">
+  <span class="course-no big">{{ ci + 1 }}.{{ mi + 1 }}</span>
+  <div>
+    <span class="kicker">{{ c.nazev }} · lekce {{ mi + 1 }} z {{ c.moduly|length }}</span>
+    <h1>{{ m.nazev }}</h1>
+  </div>
 </section>
 
 <div class="module-layout" style="--cat: {{ c.barva }}">
   <article class="lesson">
+    <div class="doc-head"><span>LSPD ACADEMY · Výcvikový materiál</span><span>Lekce {{ ci + 1 }}.{{ mi + 1 }}</span></div>
+    <div class="doc-body">
     {% for b in blocks %}
       {% if b.type == 'heading' %}<h2 class="tag">{{ b.text }}</h2>
       {% elif b.type == 'bullet' %}<p class="bullet">{{ b.text }}</p>
@@ -31,6 +40,7 @@
     {% if m.video %}
       <a class="video" href="{{ m.video }}" target="_blank" rel="noopener noreferrer">▶ Přehrát video ukázku</a>
     {% endif %}
+    </div>
   </article>
 
   <aside class="png-panel">
@@ -46,8 +56,8 @@
   </aside>
 </div>
 
-<nav class="pager">
-  {% if prev_m %}<a class="btn" href="{{ url_for('module', cat=c.slug, mod=prev_m.slug) }}">← {{ prev_m.nazev }}</a>{% else %}<span></span>{% endif %}
-  {% if next_m %}<a class="btn" href="{{ url_for('module', cat=c.slug, mod=next_m.slug) }}">{{ next_m.nazev }} →</a>{% endif %}
+<nav class="pager" style="--cat: {{ c.barva }}">
+  {% if prev_m %}<a href="{{ url_for('module', cat=c.slug, mod=prev_m.slug) }}"><small>← Předchozí lekce</small><b>{{ prev_m.nazev }}</b></a>{% else %}<span></span>{% endif %}
+  {% if next_m %}<a class="next" href="{{ url_for('module', cat=c.slug, mod=next_m.slug) }}"><small>Další lekce →</small><b>{{ next_m.nazev }}</b></a>{% endif %}
 </nav>
 {% endblock %}
