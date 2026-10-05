@@ -101,6 +101,7 @@ def save_uploads(files, prefix):
             continue
         name = secure_filename(f"{prefix}-{uuid.uuid4().hex[:8]}{ext}")
         f.save(os.path.join(store.upload_dir(), name))
+        store.push(f"uploads/{name}")
         names.append(name)
     return names
 
