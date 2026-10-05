@@ -75,8 +75,15 @@ def create_app():
 
     @app.route("/")
     def index():
-        total = sum(len(c["moduly"]) for c in MANUAL)
-        return render_template("index.html", total=total)
+        previews = [[module_preview(ci, mi, m) for mi, m in enumerate(c["moduly"])]
+                    for ci, c in enumerate(MANUAL)]
+        flat = [p for cat in previews for p in cat]
+        stats = {
+            "modules": len(flat),
+            "pages": sum(p["pages"] for p in flat),
+            "images": sum(p["images"] for p in flat),
+        }
+        return render_template("index.html", previews=previews, stats=stats)
 
     @app.route("/k/<cat>")
     def category(cat):

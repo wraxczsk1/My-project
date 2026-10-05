@@ -1,10 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="hero">
+<section class="hero" style="--stripe: {% for c in categories %}{{ c.barva }}{% if not loop.last %}, {% endif %}{% endfor %}">
   <div>
     <span class="kicker">★ Los Santos Police Department · Akademie</span>
     <h1>LSPD MANUAL</h1>
-    <p>Učivo pro kadety: {{ categories|length }} kategorií, {{ total }} modulů. Každý modul si stáhneš jako PNG a nahraješ na Discord.</p>
+    <p>Učivo pro kadety. Vyber kategorii, projdi moduly a každý si stáhni jako PNG na Discord.</p>
+    <div class="hero-stats">
+      <span><b>{{ categories|length }}</b><small>kategorií</small></span>
+      <span><b>{{ stats.modules }}</b><small>modulů</small></span>
+      <span><b>{{ stats.pages }}</b><small>PNG stran</small></span>
+      <span><b>{{ stats.images }}</b><small>obrázků</small></span>
+    </div>
   </div>
   <div class="hero-actions">
     <a class="btn" href="{{ url_for('overview_image') }}" target="_blank">Obsah (PNG)</a>
@@ -13,7 +19,7 @@
 </section>
 
 <div class="cat-grid">
-  {% for c in categories %}
+  {% for c in categories %}{% set ci = loop.index0 %}
   <article class="cat-card" style="--cat: {{ c.barva }}">
     <a class="cat-card-head" href="{{ url_for('category', cat=c.slug) }}">
       <span class="cat-icon">{{ c.ikona }}</span>
@@ -21,10 +27,20 @@
       <span class="pill">{{ c.moduly|length }} modulů</span>
     </a>
     <ol class="mod-list">
-      {% for m in c.moduly %}
-      <li><a href="{{ url_for('module', cat=c.slug, mod=m.slug) }}"><span class="num">{{ loop.index }}</span>{{ m.nazev }}</a></li>
+      {% for m in c.moduly %}{% set p = previews[ci][loop.index0] %}
+      <li><a href="{{ url_for('module', cat=c.slug, mod=m.slug) }}">
+        <span class="num">{{ loop.index }}</span>
+        <span class="name">{{ m.nazev }}</span>
+        {% if p.video %}<span class="tag">▶</span>{% endif %}
+        {% if p.images %}<span class="tag">{{ p.images }} obr.</span>{% endif %}
+        {% if p.pages > 1 %}<span class="tag multi">{{ p.pages }} PNG</span>{% endif %}
+      </a></li>
       {% endfor %}
     </ol>
+    <div class="cat-card-foot">
+      <span class="meta">{{ previews[ci]|sum(attribute='pages') }} PNG stran</span>
+      <a class="more" href="{{ url_for('category', cat=c.slug) }}">Otevřít kategorii →</a>
+    </div>
   </article>
   {% endfor %}
 </div>
