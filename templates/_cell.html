@@ -1,4 +1,0 @@
-{%- if v is none %}<span class="null">—</span>
-{%- elif c.type == 'BOOLEAN' %}<span class="pill {{ 'ok' if v else 'no' }}">{{ 'Ano' if v else 'Ne' }}</span>
-{%- elif c.ref %}<a href="{{ url_for('edit_row', table=c.ref, row_id=v) }}">{{ refs[c.ref].get(v, '#' ~ v) }}</a>
-{%- else %}{{ v }}{% endif -%}

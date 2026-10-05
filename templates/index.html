@@ -1,89 +1,31 @@
 {% extends "base.html" %}
-{% block title %}Nástěnka{% endblock %}
 {% block content %}
-<div class="header">
-  <h1>Nástěnka</h1>
-  {% if lspd %}<div class="toolbar"><a class="btn gold" href="{{ url_for('manual') }}">📖 LSPD MANUAL</a><a class="btn primary" href="{{ url_for('training') }}">Přehled výcviku</a></div>{% endif %}
-</div>
-
-{% if stats %}
-<div class="stats">
-  <a class="stat" href="{{ url_for('view_table', table='dustojnici') }}"><b>{{ stats.officers }}</b><span>Důstojníků</span></a>
-  <a class="stat" href="{{ url_for('training') }}"><b>{{ stats.cadets }}</b><span>Kadetů</span></a>
-  <a class="stat live" href="#ve-sluzbe"><b>{{ stats.on_duty }}</b><span>Ve službě</span></a>
-  <a class="stat" href="{{ url_for('view_table', table='absolvovane_vycviky', sort='id', dir='desc') }}"><b>{{ stats.trainings }}</b><span>Splněných modulů</span></a>
-</div>
-
-<div class="panels two">
-  <div class="panel" id="ve-sluzbe">
-    <h3>Ve službě</h3>
-    <table class="data compact">
-      <thead><tr><th>Důstojník</th><th>Unit</th><th>Partner</th><th>Od</th><th></th></tr></thead>
-      <tbody>
-        {% for s in on_duty %}
-        <tr>
-          <td>{{ s.jmeno or '—' }} <span class="muted">{{ s.volacka or '' }}</span></td>
-          <td>{{ s.unit or '—' }}</td>
-          <td>{{ s.partner or '—' }}</td>
-          <td>{{ s.zacatek }}</td>
-          <td><form method="post" action="{{ url_for('duty_end', shift_id=s.id) }}" data-confirm="Ukončit službu?"><button class="btn small danger">Ukončit</button></form></td>
-        </tr>
-        {% else %}
-        <tr><td colspan="5" class="muted center">Nikdo není ve službě</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    <form method="post" action="{{ url_for('duty_start') }}" class="duty-form">
-      <select name="dustojnik" required>
-        <option value="">— důstojník —</option>
-        {% for id, name in officers.items() %}<option value="{{ id }}">{{ name }}</option>{% endfor %}
-      </select>
-      <input name="unit" placeholder="Unit (např. 1-ADAM-12)">
-      <select name="partner">
-        <option value="">— partner —</option>
-        {% for id, name in officers.items() %}<option value="{{ id }}">{{ name }}</option>{% endfor %}
-      </select>
-      <button class="btn primary">Nastoupit do služby</button>
-    </form>
+<section class="hero">
+  <div>
+    <span class="kicker">★ Los Santos Police Department · Akademie</span>
+    <h1>LSPD MANUAL</h1>
+    <p>Učivo pro kadety: {{ categories|length }} kategorií, {{ total }} modulů. Každý modul si stáhneš jako PNG a nahraješ na Discord.</p>
   </div>
-
-  <div class="panel">
-    <h3>Poslední výcviky</h3>
-    <table class="data compact">
-      <thead><tr><th>Datum</th><th>Důstojník</th><th>Modul</th><th>Body</th><th></th></tr></thead>
-      <tbody>
-        {% for r in recent %}
-        <tr>
-          <td>{{ r.datum or '—' }}</td>
-          <td>{{ r.jmeno or '—' }}</td>
-          <td>{{ r.vycvik or '—' }}</td>
-          <td>{{ r.body if r.body is not none else '—' }}</td>
-          <td><span class="pill {{ 'ok' if r.splneno else 'no' }}">{{ 'Splněno' if r.splneno else 'Nesplněno' }}</span></td>
-        </tr>
-        {% else %}
-        <tr><td colspan="5" class="muted center">Zatím žádné záznamy</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    <a class="btn" href="{{ url_for('add_row', table='absolvovane_vycviky') }}">+ Zapsat výcvik</a>
+  <div class="hero-actions">
+    <a class="btn" href="{{ url_for('overview_image') }}" target="_blank">Obsah (PNG)</a>
+    <a class="btn gold" href="{{ url_for('manual_zip') }}">⬇ Stáhnout vše (ZIP)</a>
   </div>
-</div>
-{% endif %}
+</section>
 
-<h2 class="section">Tabulky databáze</h2>
-{% if tables %}
-<div class="cards">
-  {% for t in tables %}
-  <a class="card" href="{{ url_for('view_table', table=t.name) }}">
-    <h2>{{ t.name|pretty }}</h2>
-    <p>{{ t.rows }} záznamů · {{ t.columns }} sloupců</p>
-  </a>
+<div class="cat-grid">
+  {% for c in categories %}
+  <article class="cat-card" style="--cat: {{ c.barva }}">
+    <a class="cat-card-head" href="{{ url_for('category', cat=c.slug) }}">
+      <span class="cat-icon">{{ c.ikona }}</span>
+      <span><small>Kategorie {{ loop.index }}</small><b>{{ c.nazev }}</b></span>
+      <span class="pill">{{ c.moduly|length }} modulů</span>
+    </a>
+    <ol class="mod-list">
+      {% for m in c.moduly %}
+      <li><a href="{{ url_for('module', cat=c.slug, mod=m.slug) }}"><span class="num">{{ loop.index }}</span>{{ m.nazev }}</a></li>
+      {% endfor %}
+    </ol>
+  </article>
   {% endfor %}
 </div>
-{% else %}
-<div class="empty">
-  <p>Databáze je prázdná. Začni vytvořením první tabulky.</p>
-  <a class="btn primary" href="{{ url_for('create_table') }}">Vytvořit tabulku</a>
-</div>
-{% endif %}
 {% endblock %}

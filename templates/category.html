@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}{{ c.nazev }}{% endblock %}
+{% block content %}
+<section class="banner" style="--cat: {{ c.barva }}">
+  <a class="crumb" href="{{ url_for('index') }}">← Obsah výcviku</a>
+  <h1><span>{{ c.ikona }}</span> {{ c.nazev }}</h1>
+  <p>Kategorie {{ ci + 1 }} · {{ c.moduly|length }} modulů</p>
+</section>
+
+<div class="mod-grid" style="--cat: {{ c.barva }}">
+  {% for m in c.moduly %}
+  <a class="mod-card" href="{{ url_for('module', cat=c.slug, mod=m.slug) }}">
+    <span class="num big">{{ loop.index }}</span>
+    <h3>{{ m.nazev }}</h3>
+    <ul>
+      {% for line in previews[loop.index0] %}<li>{{ line }}</li>{% endfor %}
+    </ul>
+    <span class="more">Otevřít modul →</span>
+  </a>
+  {% endfor %}
+</div>
+{% endblock %}
