@@ -1,5 +1,6 @@
 import io
 import zipfile
+from collections import Counter
 from functools import lru_cache
 
 from flask import Flask, Response, abort, render_template, request
@@ -95,10 +96,12 @@ def create_app():
     def module(cat, mod):
         ci, c, mi, m = find_module(cat, mod)
         images = [name for name in m["obrazky"] if image_path(name)]
+        blocks = parse(m["text"])
+        code_counts = Counter(r["kind"] for b in blocks if b["type"] == "codes" for r in b["rows"])
         prev_m = c["moduly"][mi - 1] if mi > 0 else None
         next_m = c["moduly"][mi + 1] if mi + 1 < len(c["moduly"]) else None
         return render_template(
-            "module.html", c=c, ci=ci, m=m, mi=mi, blocks=parse(m["text"]), images=images,
+            "module.html", c=c, ci=ci, m=m, mi=mi, blocks=blocks, images=images, code_counts=code_counts,
             pages=len(module_pages(ci, mi)), prev_m=prev_m, next_m=next_m, active_cat=c["slug"],
         )
 

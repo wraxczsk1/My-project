@@ -40,6 +40,14 @@ CODE_LABELS = {
     "prikaz": "Příkazové kódy",
 }
 
+CODE_SHORT = {
+    "status": "Status",
+    "oznameni": "Oznámení",
+    "dispatch": "Dispatch",
+    "emergency": "Emergency",
+    "prikaz": "Příkaz",
+}
+
 
 def parse(text):
     blocks = []
@@ -194,32 +202,31 @@ def legend_unit():
 
 
 def code_units(rows, color):
-    code_font, text_font, lh = font(23, True), font(25), 32
-    chip_w = max(90, min(250, max(code_font.getlength(r["code"]) for r in rows) + 30))
-    col_w = (CW - 14) / 2
-    text_w = col_w - chip_w - 28
+    cols, gap = 3, 14
+    code_font, label_font, text_font, lh = font(30, True), font(16, True), font(24), 30
+    head_h = 52
+    col_w = (CW - gap * (cols - 1)) / cols
     units = []
-    for i in range(0, len(rows), 2):
-        pair = []
-        for r in rows[i:i + 2]:
-            pair.append((r, wrap(r["code"], code_font, chip_w - 20), wrap(r["text"], text_font, text_w)))
-        cell_h = max(56, max(max(len(c), len(t)) * lh + 22 for _, c, t in pair))
+    for i in range(0, len(rows), cols):
+        group = [(r, wrap(r["text"], text_font, col_w - 28)) for r in rows[i:i + cols]]
+        tile_h = head_h + max(len(t) for _, t in group) * lh + 24
 
-        def draw(img, d, x, y, pair=pair, cell_h=cell_h):
-            for col, (r, code_lines, text_lines) in enumerate(pair):
-                cx = x + col * (col_w + 14)
+        def draw(img, d, x, y, group=group, tile_h=tile_h):
+            for col, (r, text_lines) in enumerate(group):
+                cx = x + col * (col_w + gap)
                 chip = CODE_COLORS.get(r["kind"], color)
-                d.rounded_rectangle((cx, y, cx + col_w, y + cell_h), radius=10, fill="#f5f7fb", outline="#e2e6ee")
-                d.rounded_rectangle((cx, y, cx + chip_w, y + cell_h), radius=10, fill=chip)
                 ink = TEXT if r["kind"] == "status" else "#ffffff"
-                top = y + (cell_h - len(code_lines) * lh) / 2
-                for n, ln in enumerate(code_lines):
-                    d.text((cx + chip_w / 2, top + n * lh + lh / 2), ln, font=code_font, fill=ink, anchor="mm")
-                top = y + (cell_h - len(text_lines) * lh) / 2
+                d.rounded_rectangle((cx, y, cx + col_w, y + tile_h), radius=10, fill="#ffffff", outline=mix(chip, "#ffffff", 0.55), width=2)
+                d.rounded_rectangle((cx, y, cx + col_w, y + head_h), radius=10, fill=chip)
+                d.rectangle((cx, y + head_h - 10, cx + col_w, y + head_h), fill=chip)
+                d.text((cx + 16, y + head_h / 2), r["code"], font=code_font, fill=ink, anchor="lm")
+                label = CODE_SHORT.get(r["kind"])
+                if label and code_font.getlength(r["code"]) + label_font.getlength(label) + 44 < col_w:
+                    d.text((cx + col_w - 14, y + head_h / 2), label.upper(), font=label_font, fill=ink, anchor="rm")
                 for n, ln in enumerate(text_lines):
-                    d.text((cx + chip_w + 14, top + n * lh + lh / 2), ln, font=text_font, fill=TEXT, anchor="lm")
+                    d.text((cx + 14, y + head_h + 12 + n * lh + lh / 2), ln, font=text_font, fill=TEXT, anchor="lm")
 
-        units.append(Unit(cell_h + 10, draw))
+        units.append(Unit(tile_h + 12, draw))
     return units
 
 

@@ -1,5 +1,41 @@
 {% extends "base.html" %}
-{% block title %}{{ m.nazev }}{% endblock %}
+{% block title %}{{ m.nazev }}{% if code_counts %}
+<script>
+(() => {
+  const input = document.getElementById("code-search");
+  if (!input) return;
+  const buttons = document.querySelectorAll(".code-filters button");
+  const grids = document.querySelectorAll(".lesson .codes");
+  const empty = document.querySelector(".code-empty");
+  let kind = "";
+  const norm = (t) => t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  function apply() {
+    const q = norm(input.value.trim());
+    let total = 0;
+    grids.forEach((grid) => {
+      let shown = 0;
+      grid.querySelectorAll(".code-tile").forEach((tile) => {
+        const ok = (!kind || tile.dataset.kind === kind) && (!q || norm(tile.textContent).includes(q));
+        tile.hidden = !ok;
+        shown += ok;
+      });
+      grid.hidden = !shown;
+      const head = grid.previousElementSibling;
+      if (head && head.tagName === "H2") head.hidden = !shown;
+      total += shown;
+    });
+    empty.hidden = total > 0;
+  }
+  buttons.forEach((b) => b.addEventListener("click", () => {
+    kind = b.dataset.kind;
+    buttons.forEach((x) => x.classList.toggle("active", x === b));
+    apply();
+  }));
+  input.addEventListener("input", apply);
+})();
+</script>
+{% endif %}
+{% endblock %}
 {% block content %}
 <nav class="crumbs">
   <a href="{{ url_for('index') }}">Přehled</a><span>/</span>
@@ -24,11 +60,22 @@
       {% elif b.type == 'warn' %}<p class="warn">⚠ {{ b.text }}</p>
       {% elif b.type == 'quote' %}<p class="quote">{{ b.text }}</p>
       {% elif b.type == 'legend' %}
-        <div class="legend">{% for k, color in code_colors.items() %}<span style="--chip: {{ color }}" class="chip {{ k }}">{{ code_labels[k] }}</span>{% endfor %}</div>
+        <div class="code-tools">
+          <input type="search" id="code-search" placeholder="Hledat kód nebo význam… např. 10-50 nebo nehoda" autocomplete="off">
+          <div class="code-filters">
+            <button type="button" class="active" data-kind="">Vše <span>{{ code_counts.values()|sum }}</span></button>
+            {% for k, color in code_colors.items() %}{% if code_counts[k] %}
+            <button type="button" data-kind="{{ k }}" style="--chip: {{ color }}">{{ code_labels[k] }} <span>{{ code_counts[k] }}</span></button>
+            {% endif %}{% endfor %}
+          </div>
+          <p class="code-empty" hidden>Nic nenalezeno.</p>
+        </div>
       {% elif b.type == 'codes' %}
         <div class="codes">
           {% for r in b.rows %}
-          <div class="code-row"><span class="chip {{ r.kind }}" style="--chip: {{ code_colors.get(r.kind, c.barva) }}">{{ r.code }}</span><span>{{ r.text }}</span></div>
+          <div class="code-tile {{ r.kind }}" data-kind="{{ r.kind }}" style="--chip: {{ code_colors.get(r.kind, c.barva) }}">
+            <b>{{ r.code }}</b><span>{{ r.text }}</span>{% if r.kind in code_labels %}<small>{{ code_labels[r.kind] }}</small>{% endif %}
+          </div>
           {% endfor %}
         </div>
       {% else %}<p class="para">{{ b.text }}</p>
@@ -60,4 +107,40 @@
   {% if prev_m %}<a href="{{ url_for('module', cat=c.slug, mod=prev_m.slug) }}"><small>← Předchozí lekce</small><b>{{ prev_m.nazev }}</b></a>{% else %}<span></span>{% endif %}
   {% if next_m %}<a class="next" href="{{ url_for('module', cat=c.slug, mod=next_m.slug) }}"><small>Další lekce →</small><b>{{ next_m.nazev }}</b></a>{% endif %}
 </nav>
+{% if code_counts %}
+<script>
+(() => {
+  const input = document.getElementById("code-search");
+  if (!input) return;
+  const buttons = document.querySelectorAll(".code-filters button");
+  const grids = document.querySelectorAll(".lesson .codes");
+  const empty = document.querySelector(".code-empty");
+  let kind = "";
+  const norm = (t) => t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  function apply() {
+    const q = norm(input.value.trim());
+    let total = 0;
+    grids.forEach((grid) => {
+      let shown = 0;
+      grid.querySelectorAll(".code-tile").forEach((tile) => {
+        const ok = (!kind || tile.dataset.kind === kind) && (!q || norm(tile.textContent).includes(q));
+        tile.hidden = !ok;
+        shown += ok;
+      });
+      grid.hidden = !shown;
+      const head = grid.previousElementSibling;
+      if (head && head.tagName === "H2") head.hidden = !shown;
+      total += shown;
+    });
+    empty.hidden = total > 0;
+  }
+  buttons.forEach((b) => b.addEventListener("click", () => {
+    kind = b.dataset.kind;
+    buttons.forEach((x) => x.classList.toggle("active", x === b));
+    apply();
+  }));
+  input.addEventListener("input", apply);
+})();
+</script>
+{% endif %}
 {% endblock %}
