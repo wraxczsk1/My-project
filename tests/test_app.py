@@ -56,7 +56,7 @@ def test_zip_contains_every_page(client):
     expected = 1 + sum(len(module_pages(ci, mi)) for ci, c in enumerate(MANUAL) for mi in range(len(c["moduly"])))
     assert len(names) == expected
     assert "00-obsah.png" in names
-    assert "07-kriminalistika/03-pouceni-pred-interakci.png" in names
+    assert "07-kriminalistika/04-pouceni-pred-interakci.png" in names
 
 
 def test_content_is_valid():

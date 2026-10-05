@@ -218,6 +218,30 @@ MANUAL = [
 - Jakékoliv porušení → odtah na 1 den
 ! Střelba po LEO → odtah na 7 dní
 """),
+        modul("Recepce", """
+Recepce na služebně je první místo, kam občan přijde. Jednej klidně, slušně a profesionálně.
+# Přivítání
+> „Dobrý den, Los Santos Police Department, jak vám mohu pomoci?“
+- Zeptej se na jméno a vyžádej si ID
+- Vyslechni důvod návštěvy, nepřerušuj a dělej si poznámky
+# Typické požadavky
+Oznámení | Sepiš Report v MDT, typ Oznámení | info
+Registrace zbraně | ID + WL, postup dle modulu Registrace zbraně | info
+Hledaná osoba | Ověř v MDT, při warrantu zajisti a volej podporu | info
+Vyzvednutí věcí | Ověř totožnost a záznam v MDT | info
+Stížnost na LEO | Předej supervisorovi, sám neřeš | info
+Pohovor / nábor | Předej vedení nebo FTO | info
+# Postup
+- Zkontroluj osobu v MDT (profil, warranty, BOLO)
+- Pokud věc nespadá pod tebe, zavolej odpovědnou osobu do recepce
+> „Lincoln 20, žádám supervisora na recepci Mission Row, 10-71.“
+- Občana informuj, jak dlouho bude čekat a co se bude dít dál
+! Nikdy nepouštěj občana za recepci bez doprovodu
+! Agresivní osobu nejdřív slovně uklidni, pak teprve použij donucovací prostředky
+# Ukončení
+> „Děkuji, vaše oznámení je zaevidované pod číslem reportu XXX.“
+- Vždy zapiš návštěvu do MDT
+"""),
         modul("Hodnosti a volací znaky", """
 Hodnost + volací znak, který používáš na vysílačce.
 # Vedení
@@ -267,6 +291,32 @@ Respond | Volačka responding last 10-68 code 2 | oznameni
 > „Lincoln 1 na Adam 1, příjem?“ (když se nikdo neozve, pokračuj)
 > „Lincoln 1 a Lincoln 20 nyní jako Adam 1, Adam 1 10-41.“
 ! Vždy jako první říkáš vyšší hodnost
+"""),
+        modul("Typické situace", """
+Vzory hlášení na frekvenci pro nejčastější situace ve službě.
+# Traffic stop
+> „Lincoln 20, 10-11 na Vinewood Blvd, modrý Sultan, SPZ 12ABC345.“
+> „Lincoln 20, 10-28 a 10-29 na řidiče, vše čisté, pokračuji.“
+> „Lincoln 20, 10-90, řidič napomenut, 10-98.“
+# Pronásledování (10-80)
+> „Lincoln 20, 10-80! Černý Buffalo, směr sever po Route 68, code 3.“
+- Hlas průběžně směr jízdy, ulici, rychlost a počet osob ve vozidle
+- Ostatní jednotky mlčí, mluví jen ta, která je za suspectem
+> „Lincoln 20, suspect opustil vozidlo, 10-70 na Grove St.“
+! Při ztrátě vozidla hned hlas 10-0 a poslední směr
+# Žádost o podporu
+> „Lincoln 20, 10-32 dva, Strawberry Ave, code 2.“
+> „Lincoln 30, responding na Lincoln 20, ETA 2 minuty.“
+! 10-99 jen při skutečném ohrožení – na frekvenci pak mluví jen jednotka v nouzi
+# Zadržení a převoz
+> „Lincoln 20, 10-95, jeden suspect zajištěn.“
+> „Lincoln 20, 10-15 na Mission Row, jeden suspect.“
+# Zdravotník a nehoda
+> „Lincoln 20, 10-50 na Del Perro Fwy, jedna zraněná osoba, 10-52.“
+> „Lincoln 20, 10-38 Pillbox, převážím zraněného suspecta.“
+# Ukončení situace
+> „Lincoln 20, code 4, 10-24, pokračuji v patrole 10-98.“
+- Na konci situace vždy nahlas code 4, ať dispatch ví, že jsi volný
 """),
         modul("Zkratky ulic", """
 # Zkratky
@@ -602,6 +652,31 @@ Chemie | Jedy a jiné látky | info
 Medicína | Čas a příčina smrti nebo zranění | info
 Psychologie | Psychologie podezřelých | info
 Genetika | Identifikace z DNA | info
+"""),
+        modul("Výslech", """
+Výslech slouží k získání informací o události od suspecta, svědka nebo poškozeného.
+# Před výslechem
+- Osobu pouč o jejích právech (Miranda) – hlavně před výslechem suspecta
+- Zjisti totožnost a zkontroluj osobu v MDT
+- Připrav si otázky podle kriminalistických otázek (Kdo, Co, Kdy, Kde, Jak, Čím, Proč)
+- Výslech prováděj v uzavřené místnosti, ideálně ve dvou
+# Průběh
+- Mluv klidně a věcně, nekřič a nevyhrožuj
+- Začni obecnými otázkami, pak přejdi ke konkrétním
+- Ptej se otevřenými otázkami: „Popište, co se stalo.“
+- Nech osobu domluvit a zapisuj si odpovědi
+- Rozpory v odpovědích si poznač a vrať se k nim později
+> „Máte právo nevypovídat. Chcete se k věci vyjádřit?“
+! Nátlak, vyhrožování ani sliby výměnou za výpověď nejsou dovoleny
+! Pokud si osoba vyžádá právníka, výslech přeruš
+# Typy vyslýchaných
+Suspect | Podezřelý – vždy pouč o právech | info
+Svědek | Viděl událost – zapiš popis osob a vozidel | info
+Poškozený | Oběť – nejdřív ověř zranění, případně EMS | info
+# Po výslechu
+- Výpověď zapiš do Incident Reportu v MDT
+- Uveď čas, místo, přítomné LEO a zda osoba vypovídala
+- Propoj záznam s Case přes ID
 """),
         modul("Poučení před interakcí", """
 Před každým úkonem musíš osobu informovat a poučit.
