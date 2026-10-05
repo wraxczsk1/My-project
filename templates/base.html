@@ -3,15 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}Databáze{% endblock %} · LSPD Akademie</title>
+  <title>{% block title %}Databáze{% endblock %} · LSPD MANUAL</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
   <aside class="sidebar">
-    <a class="brand" href="{{ url_for('index') }}"><span class="badge">★</span> LSPD<small>Akademie výcviku</small></a>
+    <a class="brand" href="{{ url_for('index') }}"><span class="badge">★</span> LSPD MANUAL<small>Los Santos Police Department</small></a>
     <nav>
       <a href="{{ url_for('index') }}">Nástěnka</a>
       {% if lspd %}
+      <a href="{{ url_for('manual') }}" class="nav-manual">📖 LSPD Manual</a>
       <a href="{{ url_for('training') }}">Výcvik</a>
       <a href="{{ url_for('view_table', table='dustojnici') }}">Důstojníci</a>
       <a href="{{ url_for('view_table', table='sluzby', sort='id', dir='desc') }}">Služby</a>

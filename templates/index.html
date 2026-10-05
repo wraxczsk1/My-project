@@ -3,7 +3,7 @@
 {% block content %}
 <div class="header">
   <h1>Nástěnka</h1>
-  {% if lspd %}<a class="btn primary" href="{{ url_for('training') }}">Přehled výcviku</a>{% endif %}
+  {% if lspd %}<div class="toolbar"><a class="btn gold" href="{{ url_for('manual') }}">📖 LSPD MANUAL</a><a class="btn primary" href="{{ url_for('training') }}">Přehled výcviku</a></div>{% endif %}
 </div>
 
 {% if stats %}

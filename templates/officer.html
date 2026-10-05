@@ -19,8 +19,9 @@
 </div>
 <div class="modules">
   {% for kategorie, modules in groups.items() %}
-  <div class="panel">
-    <h3>{{ kategorie }} <span class="muted">{{ modules|selectattr('splneno')|list|length }}/{{ modules|length }}</span></h3>
+  {% set c = cats.get(kategorie, {}) %}
+  <div class="panel cat-panel" style="--cat: {{ c.get('barva')|color }}">
+    <h3>{{ c.get('ikona') or '' }} {{ kategorie }} <span class="muted">{{ modules|selectattr('splneno')|list|length }}/{{ modules|length }}</span></h3>
     <ul class="module-list">
       {% for m in modules %}
       <li class="{{ 'done' if m.splneno else ('failed' if m.splneno is not none else '') }}">

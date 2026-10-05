@@ -3,6 +3,8 @@ import io
 import os
 import re
 import sqlite3
+import unicodedata
+import zipfile
 from datetime import datetime
 
 from flask import (
@@ -19,6 +21,7 @@ from flask import (
 )
 
 from lspd_seed import seed_lspd
+from manual_png import render_category, render_overview
 
 COLUMN_TYPES = {
     "TEXT": "Text",
@@ -32,6 +35,8 @@ IDENTIFIER_RE = re.compile(r"^[^\W\d]\w{0,62}$")
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 DATETIME_RE = re.compile(r"^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}(:\d{2})?$")
 PAGE_SIZE = 25
+HEX_COLOR_RE = re.compile(r"^#[0-9a-fA-F]{6}$")
+DEFAULT_COLOR = "#1d4ed8"
 DISPLAY_NAMES = {
     "dustojnici": "Důstojníci", "absolvovane_vycviky": "Absolvované výcviky",
     "vycviky": "Výcviky", "sluzby": "Služby", "jmeno": "Jméno", "volacka": "Volačka",
@@ -58,6 +63,7 @@ def create_app(test_config=None):
 
     app.teardown_appcontext(close_db)
     app.add_template_filter(pretty_name, "pretty")
+    app.add_template_filter(safe_color, "color")
     if app.config["SEED_LSPD"]:
         with app.app_context():
             if "dustojnici" not in list_tables():
@@ -235,9 +241,44 @@ def lspd_ready():
     return all(t in tables for t in LSPD_TABLES)
 
 
+def safe_next():
+    target = request.args.get("next") or ""
+    return target if target.startswith("/") and not target.startswith(("//", "/\\")) else None
+
+
+def safe_color(value):
+    return value if isinstance(value, str) and HEX_COLOR_RE.match(value) else DEFAULT_COLOR
+
+
+def slugify(text):
+    ascii_text = unicodedata.normalize("NFKD", text or "").encode("ascii", "ignore").decode()
+    return re.sub(r"[^a-z0-9]+", "-", ascii_text.lower()).strip("-") or "kategorie"
+
+
+def manual_data(db, kat_id=None):
+    categories = [dict(r) for r in db.execute('SELECT * FROM "kategorie" ORDER BY "poradi", id')]
+    if kat_id is not None:
+        categories = [c for c in categories if c["id"] == kat_id]
+    for c in categories:
+        c["barva"] = safe_color(c.get("barva"))
+        c.setdefault("ikona", None)
+        c["modules"] = [
+            dict(r) for r in db.execute(
+                'SELECT * FROM "vycviky" WHERE "kategorie" = ? ORDER BY id', [c["id"]]
+            )
+        ]
+        for m in c["modules"]:
+            m.setdefault("popis", None)
+    return categories
+
+
+def png_name(category):
+    return f"{category['id']:02d}-{slugify(category['nazev'])}.png"
+
+
 def training_overview(db):
     categories = db.execute(
-        'SELECT k.id, k."nazev", COUNT(v.id) AS total FROM "kategorie" k '
+        'SELECT k.*, COUNT(v.id) AS total FROM "kategorie" k '
         'LEFT JOIN "vycviky" v ON v."kategorie" = k.id '
         'GROUP BY k.id ORDER BY k."poradi", k.id'
     ).fetchall()
@@ -406,6 +447,49 @@ def register_routes(app):
         return render_template(
             "officer.html", officer=officer, groups=groups,
             completed=completed, total=len(modules),
+            cats={c["nazev"]: c for c in manual_data(db)},
+        )
+
+    @app.route("/manual")
+    def manual():
+        if not lspd_ready():
+            abort(404)
+        return render_template("manual.html", categories=manual_data(get_db()))
+
+    def png_response(data, filename):
+        response = Response(data, mimetype="image/png")
+        if request.args.get("download"):
+            response.headers["Content-Disposition"] = f'attachment; filename="{filename}"'
+        return response
+
+    @app.route("/manual/obsah.png")
+    def manual_overview_png():
+        if not lspd_ready():
+            abort(404)
+        return png_response(render_overview(manual_data(get_db())), "00-obsah.png")
+
+    @app.route("/manual/<int:kat_id>.png")
+    def manual_png(kat_id):
+        if not lspd_ready():
+            abort(404)
+        categories = manual_data(get_db(), kat_id)
+        if not categories:
+            abort(404)
+        return png_response(render_category(categories[0]), png_name(categories[0]))
+
+    @app.route("/manual/lspd-manual.zip")
+    def manual_zip():
+        if not lspd_ready():
+            abort(404)
+        categories = manual_data(get_db())
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as archive:
+            archive.writestr("00-obsah.png", render_overview(categories))
+            for c in categories:
+                archive.writestr(png_name(c), render_category(c))
+        return Response(
+            buf.getvalue(), mimetype="application/zip",
+            headers={"Content-Disposition": 'attachment; filename="lspd-manual.zip"'},
         )
 
     @app.route("/tables/new", methods=["GET", "POST"])
@@ -505,7 +589,7 @@ def register_routes(app):
                     flash(e, "error")
                 return render_row_form(table, columns, request.form, status=400)
             flash("Záznam přidán", "success")
-            return redirect(request.args.get("next") or url_for("view_table", table=table))
+            return redirect(safe_next() or url_for("view_table", table=table))
         return render_row_form(table, columns, request.args)
 
     @app.route("/t/<table>/<int:row_id>/edit", methods=["GET", "POST"])
@@ -535,7 +619,7 @@ def register_routes(app):
                     flash(e, "error")
                 return render_row_form(table, columns, request.form, row_id, 400)
             flash("Záznam uložen", "success")
-            return redirect(url_for("view_table", table=table))
+            return redirect(safe_next() or url_for("view_table", table=table))
         return render_row_form(table, columns, row, row_id)
 
     @app.post("/t/<table>/<int:row_id>/delete")

@@ -1,4 +1,4 @@
-# LSPD Akademie
+# LSPD MANUAL
 
 Databázová aplikace pro výcvik LSPD (FiveM) postavená na Flask + SQLite.
 

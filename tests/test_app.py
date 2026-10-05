@@ -146,3 +146,18 @@ def test_add_ref_column(lspd):
     lspd.post("/t/sluzby/columns", data={"col_name": ["vozidlo_ridic"], "col_type": ["REF:dustojnici"]})
     page = lspd.get("/t/sluzby").get_data(as_text=True)
     assert "→ dustojnici" in page
+
+
+def test_manual_page_and_png_export(lspd):
+    import io
+    import zipfile
+
+    page = lspd.get("/manual").get_data(as_text=True)
+    assert "LSPD MANUAL" in page and "Máte právo nevypovídat" in page
+    r = lspd.get("/manual/1.png?download=1")
+    assert r.mimetype == "image/png" and r.data[:4] == b"\x89PNG"
+    assert "01-zaklady-sluzby.png" in r.headers["Content-Disposition"]
+    assert lspd.get("/manual/obsah.png").data[:4] == b"\x89PNG"
+    assert lspd.get("/manual/999.png").status_code == 404
+    archive = zipfile.ZipFile(io.BytesIO(lspd.get("/manual/lspd-manual.zip").data))
+    assert len(archive.namelist()) == 8 and "07-kriminalistika.png" in archive.namelist()

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}LSPD MANUAL{% endblock %}
+{% block content %}
+<div class="manual-hero">
+  <div>
+    <span class="hero-badge">★ Los Santos Police Department</span>
+    <h1>LSPD MANUAL</h1>
+    <p>Výukové materiály pro kadety. Každou kategorii si stáhneš jako PNG a nahraješ na Discord.</p>
+  </div>
+  <div class="toolbar">
+    <a class="btn" href="{{ url_for('manual_overview_png', download=1) }}">Obsah (PNG)</a>
+    <a class="btn gold" href="{{ url_for('manual_zip') }}">Stáhnout vše (ZIP)</a>
+  </div>
+</div>
+<nav class="cat-chips">
+  {% for c in categories %}
+  <a class="chip" style="--cat: {{ c.barva|color }}" href="#kat-{{ c.id }}">{{ c.ikona or '' }} {{ c.nazev }} <b>{{ c.modules|length }}</b></a>
+  {% endfor %}
+</nav>
+{% for c in categories %}
+<section class="manual-cat" id="kat-{{ c.id }}" style="--cat: {{ c.barva|color }}">
+  <div class="manual-cat-head">
+    <h2><span class="cat-icon">{{ c.ikona or '' }}</span> {{ c.nazev }} <span class="count">{{ c.modules|length }} modulů</span></h2>
+    <div class="toolbar">
+      <a class="btn small" href="{{ url_for('manual_png', kat_id=c.id) }}" target="_blank">Náhled PNG</a>
+      <a class="btn small" href="{{ url_for('manual_png', kat_id=c.id, download=1) }}">Stáhnout PNG</a>
+    </div>
+  </div>
+  <div class="manual-grid">
+    {% for m in c.modules %}
+    <article class="manual-card">
+      <h3><span class="num">{{ loop.index }}</span> {{ m.nazev }}</h3>
+      {% set lines = (m.popis or '').splitlines()|select|list %}
+      {% if lines %}
+      <ul>{% for line in lines %}<li>{{ line }}</li>{% endfor %}</ul>
+      {% else %}
+      <p class="muted">Zatím bez textu – doplň ho v <a href="{{ url_for('edit_row', table='vycviky', row_id=m.id) }}">modulu</a>.</p>
+      {% endif %}
+      <a class="edit-link" href="{{ url_for('edit_row', table='vycviky', row_id=m.id, next=url_for('manual') ~ '#kat-' ~ c.id) }}">Upravit text</a>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% else %}
+<div class="empty">Manuál je prázdný.</div>
+{% endfor %}
+{% endblock %}
