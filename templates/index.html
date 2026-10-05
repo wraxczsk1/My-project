@@ -23,8 +23,8 @@
   <article class="cat-card" style="--cat: {{ c.barva }}">
     <a class="cat-card-head" href="{{ url_for('category', cat=c.slug) }}">
       <span class="cat-icon">{{ c.ikona }}</span>
-      <span><small>Kategorie {{ loop.index }}</small><b>{{ c.nazev }}</b></span>
-      <span class="pill">{{ c.moduly|length }} modulů</span>
+      {% set n = c.moduly|length %}
+      <span><small>Kategorie {{ loop.index }} · {{ n }} {{ 'modul' if n == 1 else ('moduly' if n < 5 else 'modulů') }}</small><b>{{ c.nazev }}</b></span>
     </a>
     <ol class="mod-list">
       {% for m in c.moduly %}{% set p = previews[ci][loop.index0] %}
