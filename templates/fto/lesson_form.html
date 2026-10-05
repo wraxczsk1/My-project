@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Upravit lekci' if m else 'Nová lekce' }}{% endblock %}
+{% block content %}
+{% set crumb = c.nazev ~ ' / ' ~ (m.nazev if m else 'Nová lekce') %}{% include "fto/_head.html" %}
+<form class="fto-card fto-form" method="post" enctype="multipart/form-data" style="--cat: {{ c.barva }}">
+  <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+  <span class="fto-tag">Kurz {{ '%02d'|format(ci + 1) }} · {{ c.nazev }}</span>
+  <h1>{{ 'Upravit lekci' if m else 'Nová lekce' }}</h1>
+  <label>Název lekce<input name="nazev" value="{{ m.nazev if m }}" required maxlength="80"></label>
+  <div class="fto-split">
+    <label>Učivo<textarea name="text" rows="22" spellcheck="true">{{ m.text if m }}</textarea></label>
+    <aside class="fto-help">
+      <b>Jak psát učivo</b>
+      <p>Jeden řádek = jeden prvek:</p>
+      <code># Nadpis</code><span>barevný nadpis sekce</span>
+      <code>- bod</code><span>odrážka</span>
+      <code>! text</code><span>červené upozornění</span>
+      <code>&gt; text</code><span>vzor hlášení / příklad</span>
+      <code>10-4 | Rozumím | oznameni</code><span>kód (typ: status, oznameni, dispatch, emergency, prikaz, info)</span>
+      <code>[legenda]</code><span>legenda barev kódů</span>
+      <code>jiný text</code><span>odstavec</span>
+    </aside>
+  </div>
+  <label>Odkaz na video (nepovinné)<input type="url" name="video" value="{{ m.video or '' if m }}" placeholder="https://medal.tv/..."></label>
+  <fieldset><legend>Obrázky</legend>
+    {% if m and m.obrazky %}<div class="fto-images">
+      {% for name in m.obrazky %}<label><img src="{{ url_for('image', name=name) }}" alt=""><span><input type="checkbox" name="smazat:{{ name }}"> odebrat</span></label>{% endfor %}
+    </div>{% endif %}
+    <input type="file" name="obrazky" accept="image/png,image/jpeg,image/webp" multiple>
+  </fieldset>
+  <div class="fto-actions"><button class="btn gold">Uložit lekci</button><a class="btn" href="{{ url_for('fto.dashboard') }}#kurz-{{ ci }}">Zrušit</a></div>
+</form>
+{% endblock %}

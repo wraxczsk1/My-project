@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Přehled{% endblock %} · LSPD MANUAL</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="lightbar" aria-hidden="true"><span class="red"></span><span class="blue"></span></div>
+<aside class="sidebar">
+  <a class="brand" href="{{ url_for('index') }}">
+    {% set badge_id = 'side' %}{% include "_badge.html" %}
+    <span><b>LSPD MANUAL</b><small>Police Academy</small></span>
+  </a>
+  <nav>
+    <a href="{{ url_for('index') }}" class="home {{ 'active' if request.endpoint == 'index' }}"><span class="code">◆</span><span class="name">Přehled výcviku</span></a>
+    <span class="nav-label">Výcvikové kurzy</span>
+    {% for c in categories %}
+      <a href="{{ url_for('category', cat=c.slug) }}" class="cat-link {{ 'active' if active_cat == c.slug }}" style="--cat: {{ c.barva }}">
+        <span class="code">{% include "_icon.html" %}</span><span class="num">{{ '%02d'|format(loop.index) }}</span><span class="name">{{ c.nazev }}</span><span class="count">{{ c.moduly|length }}</span>
+      </a>
+    {% endfor %}
+  </nav>
+  <div class="side-foot">
+    {% if fto_user %}<a class="btn fto-btn full {{ 'active' if request.blueprint == 'fto' }}" href="{{ url_for('fto.dashboard') }}">★ FTO MANAGE</a>{% endif %}
+    <a class="btn gold full" href="{{ url_for('manual_zip') }}">⬇ Stáhnout vše (ZIP)</a>
+    <small>Pouze pro výcvik kadetů LSPD{% if not fto_user and not config.STATIC_BUILD %} · <a class="fto-login" href="{{ url_for('fto.login') }}">FTO</a>{% endif %}</small>
+  </div>
+</aside>
+<main>
+  {% block content %}{% endblock %}
+</main>
+</body>
+</html>

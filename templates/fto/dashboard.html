@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}FTO MANAGE{% endblock %}
+{% block content %}
+{% set crumb = None %}{% include "fto/_head.html" %}
+<header class="fto-top">
+  <div><span class="fto-tag">FTO MANAGE</span><h1>Správa výcviku</h1><p>Přihlášen: <b>{{ fto_user }}</b></p></div>
+  <div class="fto-actions">
+    <a class="btn gold" href="{{ url_for('fto.course_form') }}">+ Nový kurz</a>
+    <form method="post" action="{{ url_for('fto.logout') }}"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><button class="btn">Odhlásit</button></form>
+  </div>
+</header>
+
+{% for c in categories %}{% set ci = loop.index0 %}
+<section class="fto-card fto-course" id="kurz-{{ ci }}" style="--cat: {{ c.barva }}">
+  <div class="fto-course-head">
+    <span class="course-icon">{% include "_icon.html" %}</span>
+    <div class="grow"><small>Kurz {{ '%02d'|format(loop.index) }}</small><h2>{{ c.nazev }}</h2></div>
+    <div class="fto-actions">
+      <form method="post" action="{{ url_for('fto.course_move', ci=ci, direction='nahoru') }}"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><button class="btn sm" {{ 'disabled' if loop.first }} title="Posunout nahoru">▲</button></form>
+      <form method="post" action="{{ url_for('fto.course_move', ci=ci, direction='dolu') }}"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><button class="btn sm" {{ 'disabled' if loop.last }} title="Posunout dolů">▼</button></form>
+      <a class="btn sm" href="{{ url_for('fto.course_form', ci=ci) }}">Upravit</a>
+      <form method="post" action="{{ url_for('fto.course_delete', ci=ci) }}" onsubmit="return confirm('Smazat celý kurz „{{ c.nazev }}“ i se všemi lekcemi?')"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><button class="btn sm danger">Smazat</button></form>
+    </div>
+  </div>
+  <ol class="fto-lessons">
+    {% for m in c.moduly %}{% set mi = loop.index0 %}
+    <li>
+      <span class="num">{{ ci + 1 }}.{{ loop.index }}</span>
+      <a class="grow" href="{{ url_for('module', cat=c.slug, mod=m.slug) }}">{{ m.nazev }}</a>
+      {% if m.obrazky %}<span class="pill">{{ m.obrazky|length }} obr.</span>{% endif %}
+      {% if m.video %}<span class="pill">video</span>{% endif %}
+      <div class="fto-actions">
+        <form method="post" action="{{ url_for('fto.lesson_move', ci=ci, mi=mi, direction='nahoru') }}"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><button class="btn sm" {{ 'disabled' if loop.first }}>▲</button></form>
+        <form method="post" action="{{ url_for('fto.lesson_move', ci=ci, mi=mi, direction='dolu') }}"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><button class="btn sm" {{ 'disabled' if loop.last }}>▼</button></form>
+        <a class="btn sm" href="{{ url_for('fto.lesson_form', ci=ci, mi=mi) }}">Upravit</a>
+        <form method="post" action="{{ url_for('fto.lesson_delete', ci=ci, mi=mi) }}" onsubmit="return confirm('Smazat lekci „{{ m.nazev }}“?')"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><button class="btn sm danger">Smazat</button></form>
+      </div>
+    </li>
+    {% else %}<li class="empty">Kurz zatím nemá žádné lekce.</li>{% endfor %}
+  </ol>
+  <a class="btn sm gold" href="{{ url_for('fto.lesson_form', ci=ci) }}">+ Přidat lekci</a>
+</section>
+{% endfor %}
+
+<section class="fto-card" id="pristup">
+  <h2>Přístup do FTO MANAGE</h2>
+  <p class="muted">Tyhle Google účty vidí tlačítko FTO MANAGE a můžou upravovat výcvik.</p>
+  <ul class="fto-emails">
+    {% for e in emails %}
+    <li><span class="grow">{{ e }}</span>
+      {% if e in owners %}<span class="pill">správce</span>{% else %}
+      <form method="post" action="{{ url_for('fto.access') }}"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><input type="hidden" name="odebrat" value="{{ e }}"><button class="btn sm danger">Odebrat</button></form>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  <form class="fto-inline" method="post" action="{{ url_for('fto.access') }}">
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    <input type="email" name="pridat" placeholder="email@gmail.com" required>
+    <button class="btn gold">Přidat FTO</button>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <div class="hero-text">
+    <span class="kicker">Los Santos Police Department · Police Academy</span>
+    <h1>LSPD MANUAL</h1>
+    <p>Výcvikový manuál kadeta. Projdi kurzy od 01 do {{ '%02d'|format(categories|length) }}, nauč se lekce a každou si stáhni jako PNG na Discord.</p>
+    <div class="hero-stats">
+      <span><b>{{ categories|length }}</b><small>kurzů</small></span>
+      <span><b>{{ stats.modules }}</b><small>lekcí</small></span>
+      <span><b>{{ stats.pages }}</b><small>PNG stran</small></span>
+      <span><b>{{ stats.images }}</b><small>obrázků</small></span>
+    </div>
+    <div class="hero-actions">
+      <a class="btn gold" href="{{ url_for('manual_zip') }}">⬇ Stáhnout vše (ZIP)</a>
+      <a class="btn ghost" href="{{ url_for('overview_image') }}" target="_blank">Obsah (PNG)</a>
+    </div>
+  </div>
+  <div class="hero-badge">{% set badge_id = 'hero' %}{% include "_badge.html" %}</div>
+</section>
+
+<div class="tape" aria-hidden="true"><span>{% for _ in range(8) %}LSPD ACADEMY ★ VÝCVIK KADETŮ ★ {% endfor %}</span></div>
+
+<div class="section-head">
+  <h2>Výcvikové kurzy</h2>
+  <span>Vyber kurz a otevři lekci</span>
+</div>
+
+<div class="course-grid">
+  {% for c in categories %}{% set ci = loop.index0 %}{% set n = c.moduly|length %}
+  <article class="course" style="--cat: {{ c.barva }}">
+    <a class="course-head" href="{{ url_for('category', cat=c.slug) }}">
+      <span class="course-no">{{ '%02d'|format(loop.index) }}</span>
+      <span class="course-title">
+        <small>Kurz {{ '%02d'|format(loop.index) }} · {{ n }} {{ 'lekce' if n < 5 else 'lekcí' }}</small>
+        <b>{{ c.nazev }}</b>
+      </span>
+      <span class="course-icon">{% include "_icon.html" %}</span>
+    </a>
+    <ol class="lesson-list">
+      {% for m in c.moduly %}{% set p = previews[ci][loop.index0] %}
+      <li><a href="{{ url_for('module', cat=c.slug, mod=m.slug) }}">
+        <span class="lno">{{ ci + 1 }}.{{ loop.index }}</span>
+        <span class="name">{{ m.nazev }}</span>
+        {% if p.video %}<span class="tag" title="Video">▶</span>{% endif %}
+        {% if p.pages > 1 %}<span class="tag hl">{{ p.pages }} PNG</span>{% endif %}
+      </a></li>
+      {% endfor %}
+    </ol>
+    <a class="course-foot" href="{{ url_for('category', cat=c.slug) }}">
+      <span>{{ previews[ci]|sum(attribute='pages') }} PNG stran</span>
+      <b>Otevřít kurz →</b>
+    </a>
+  </article>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}{{ m.nazev }}{% if code_counts %}
+<script>
+(() => {
+  const input = document.getElementById("code-search");
+  if (!input) return;
+  const buttons = document.querySelectorAll(".code-filters button");
+  const grids = document.querySelectorAll(".lesson .codes");
+  const empty = document.querySelector(".code-empty");
+  let kind = "";
+  const norm = (t) => t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  function apply() {
+    const q = norm(input.value.trim());
+    let total = 0;
+    grids.forEach((grid) => {
+      let shown = 0;
+      grid.querySelectorAll(".code-tile").forEach((tile) => {
+        const ok = (!kind || tile.dataset.kind === kind) && (!q || norm(tile.textContent).includes(q));
+        tile.hidden = !ok;
+        shown += ok;
+      });
+      grid.hidden = !shown;
+      const head = grid.previousElementSibling;
+      if (head && head.tagName === "H2") head.hidden = !shown;
+      total += shown;
+    });
+    empty.hidden = total > 0;
+  }
+  buttons.forEach((b) => b.addEventListener("click", () => {
+    kind = b.dataset.kind;
+    buttons.forEach((x) => x.classList.toggle("active", x === b));
+    apply();
+  }));
+  input.addEventListener("input", apply);
+})();
+</script>
+{% endif %}
+{% endblock %}
+{% block content %}
+<nav class="crumbs">
+  <a href="{{ url_for('index') }}">Přehled</a><span>/</span>
+  <a href="{{ url_for('category', cat=c.slug) }}">Kurz {{ '%02d'|format(ci + 1) }} · {{ c.nazev }}</a><span>/</span>
+  <b>Lekce {{ ci + 1 }}.{{ mi + 1 }}</b>
+</nav>
+<section class="file-head" style="--cat: {{ c.barva }}">
+  <span class="course-no big">{{ ci + 1 }}.{{ mi + 1 }}</span>
+  <div>
+    <span class="kicker">{{ c.nazev }} · lekce {{ mi + 1 }} z {{ c.moduly|length }}</span>
+    <h1>{{ m.nazev }}</h1>
+  </div>
+</section>
+
+<div class="module-layout" style="--cat: {{ c.barva }}">
+  <article class="lesson">
+    <div class="doc-head"><span>LSPD ACADEMY · Výcvikový materiál</span><span>Lekce {{ ci + 1 }}.{{ mi + 1 }}</span></div>
+    <div class="doc-body">
+    {% for b in blocks %}
+      {% if b.type == 'heading' %}<h2 class="tag">{{ b.text }}</h2>
+      {% elif b.type == 'bullet' %}<p class="bullet">{{ b.text }}</p>
+      {% elif b.type == 'warn' %}<p class="warn">⚠ {{ b.text }}</p>
+      {% elif b.type == 'quote' %}<p class="quote">{{ b.text }}</p>
+      {% elif b.type == 'legend' %}
+        <div class="code-tools">
+          <input type="search" id="code-search" placeholder="Hledat kód nebo význam… např. 10-50 nebo nehoda" autocomplete="off">
+          <div class="code-filters">
+            <button type="button" class="active" data-kind="">Vše <span>{{ code_counts.values()|sum }}</span></button>
+            {% for k, color in code_colors.items() %}{% if code_counts[k] %}
+            <button type="button" data-kind="{{ k }}" style="--chip: {{ color }}">{{ code_labels[k] }} <span>{{ code_counts[k] }}</span></button>
+            {% endif %}{% endfor %}
+          </div>
+          <p class="code-empty" hidden>Nic nenalezeno.</p>
+        </div>
+      {% elif b.type == 'codes' %}
+        <div class="codes">
+          {% for r in b.rows %}
+          <div class="code-tile {{ r.kind }}" data-kind="{{ r.kind }}" style="--chip: {{ code_colors.get(r.kind, c.barva) }}">
+            <b>{{ r.code }}</b><span>{{ r.text }}</span>{% if r.kind in code_labels %}<small>{{ code_labels[r.kind] }}</small>{% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}<p class="para">{{ b.text }}</p>
+      {% endif %}
+    {% endfor %}
+    {% for name in images %}
+      <img class="lesson-img" src="{{ url_for('image', name=name) }}" alt="{{ m.nazev }}">
+    {% endfor %}
+    {% if m.video %}
+      <a class="video" href="{{ m.video }}" target="_blank" rel="noopener noreferrer">▶ Přehrát video ukázku</a>
+    {% endif %}
+    </div>
+  </article>
+
+  <aside class="png-panel">
+    <h3>PNG pro Discord</h3>
+    {% for p in range(1, pages + 1) %}
+    <figure>
+      <a href="{{ url_for('module_image', cat=c.slug, mod=m.slug, page=p) }}" target="_blank">
+        <img src="{{ url_for('module_image', cat=c.slug, mod=m.slug, page=p) }}" alt="PNG {{ p }}" loading="lazy">
+      </a>
+      <a class="btn small full" href="{{ url_for('module_image', cat=c.slug, mod=m.slug, page=p) }}" download="{{ '%02d'|format(ci + 1) }}-{{ m.slug }}{% if pages > 1 %}-{{ p }}{% endif %}.png">⬇ Stáhnout{% if pages > 1 %} {{ p }}/{{ pages }}{% endif %}</a>
+    </figure>
+    {% endfor %}
+  </aside>
+</div>
+
+<nav class="pager" style="--cat: {{ c.barva }}">
+  {% if prev_m %}<a href="{{ url_for('module', cat=c.slug, mod=prev_m.slug) }}"><small>← Předchozí lekce</small><b>{{ prev_m.nazev }}</b></a>{% else %}<span></span>{% endif %}
+  {% if next_m %}<a class="next" href="{{ url_for('module', cat=c.slug, mod=next_m.slug) }}"><small>Další lekce →</small><b>{{ next_m.nazev }}</b></a>{% endif %}
+</nav>
+{% if code_counts %}
+<script>
+(() => {
+  const input = document.getElementById("code-search");
+  if (!input) return;
+  const buttons = document.querySelectorAll(".code-filters button");
+  const grids = document.querySelectorAll(".lesson .codes");
+  const empty = document.querySelector(".code-empty");
+  let kind = "";
+  const norm = (t) => t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  function apply() {
+    const q = norm(input.value.trim());
+    let total = 0;
+    grids.forEach((grid) => {
+      let shown = 0;
+      grid.querySelectorAll(".code-tile").forEach((tile) => {
+        const ok = (!kind || tile.dataset.kind === kind) && (!q || norm(tile.textContent).includes(q));
+        tile.hidden = !ok;
+        shown += ok;
+      });
+      grid.hidden = !shown;
+      const head = grid.previousElementSibling;
+      if (head && head.tagName === "H2") head.hidden = !shown;
+      total += shown;
+    });
+    empty.hidden = total > 0;
+  }
+  buttons.forEach((b) => b.addEventListener("click", () => {
+    kind = b.dataset.kind;
+    buttons.forEach((x) => x.classList.toggle("active", x === b));
+    apply();
+  }));
+  input.addEventListener("input", apply);
+})();
+</script>
+{% endif %}
+{% endblock %}

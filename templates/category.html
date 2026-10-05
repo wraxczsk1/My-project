@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}{{ c.nazev }}{% endblock %}
+{% block content %}
+{% set n = c.moduly|length %}
+<nav class="crumbs"><a href="{{ url_for('index') }}">Přehled</a><span>/</span><b>Kurz {{ '%02d'|format(ci + 1) }}</b></nav>
+<section class="file-head" style="--cat: {{ c.barva }}">
+  <span class="course-no big">{{ '%02d'|format(ci + 1) }}</span>
+  <div>
+    <span class="kicker">Výcvikový kurz {{ '%02d'|format(ci + 1) }} · {{ n }} {{ 'lekce' if n < 5 else 'lekcí' }}</span>
+    <h1>{{ c.nazev }}</h1>
+  </div>
+  <span class="course-icon big">{% include "_icon.html" %}</span>
+</section>
+
+<div class="lesson-grid" style="--cat: {{ c.barva }}">
+  {% for m in c.moduly %}{% set p = previews[loop.index0] %}
+  <a class="lesson-card" href="{{ url_for('module', cat=c.slug, mod=m.slug) }}">
+    <div class="lc-head">
+      <span class="lno">{{ ci + 1 }}.{{ loop.index }}</span>
+      <h3>{{ m.nazev }}</h3>
+    </div>
+    {% if p.sections %}
+    <div class="sec-tags">{% for s in p.sections %}<span>{{ s }}</span>{% endfor %}</div>
+    {% endif %}
+    {% if p.lines %}
+    <ul>{% for line in p.lines %}<li>{{ line }}</li>{% endfor %}</ul>
+    {% elif p.codes %}
+    <div class="code-preview">
+      {% for r in p.codes %}<span class="cp" style="--k: {{ code_colors.get(r.kind, '#64748b') }}"><b>{{ r.code }}</b> {{ r.text }}</span>{% endfor %}
+      {% if p.code_count > p.codes|length %}<span class="cp-more">+ {{ p.code_count - p.codes|length }} dalších</span>{% endif %}
+    </div>
+    {% endif %}
+    <div class="lc-foot">
+      <span>{{ p.pages }} PNG{% if p.images %} · {{ p.images }} obr.{% endif %}{% if p.video %} · ▶ video{% endif %}</span>
+      <b>Otevřít lekci →</b>
+    </div>
+  </a>
+  {% endfor %}
+</div>
+{% endblock %}
