@@ -8,14 +8,27 @@
 </section>
 
 <div class="mod-grid" style="--cat: {{ c.barva }}">
-  {% for m in c.moduly %}
+  {% for m in c.moduly %}{% set p = previews[loop.index0] %}
   <a class="mod-card" href="{{ url_for('module', cat=c.slug, mod=m.slug) }}">
-    <span class="num big">{{ loop.index }}</span>
-    <h3>{{ m.nazev }}</h3>
-    <ul>
-      {% for line in previews[loop.index0] %}<li>{{ line }}</li>{% endfor %}
-    </ul>
-    <span class="more">Otevřít modul →</span>
+    <div class="mod-card-head">
+      <span class="num big">{{ loop.index }}</span>
+      <h3>{{ m.nazev }}</h3>
+    </div>
+    {% if p.sections %}
+    <div class="sec-tags">{% for s in p.sections %}<span>{{ s }}</span>{% endfor %}</div>
+    {% endif %}
+    {% if p.lines %}
+    <ul>{% for line in p.lines %}<li>{{ line }}</li>{% endfor %}</ul>
+    {% elif p.codes %}
+    <div class="code-preview">
+      {% for r in p.codes %}<span class="cp" style="--k: {{ code_colors.get(r.kind, '#64748b') }}"><b>{{ r.code }}</b> {{ r.text }}</span>{% endfor %}
+      {% if p.code_count > p.codes|length %}<span class="cp-more">+ {{ p.code_count - p.codes|length }} dalších</span>{% endif %}
+    </div>
+    {% endif %}
+    <div class="mod-card-foot">
+      <span class="meta">🖼 {{ p.pages }} PNG{% if p.images %} · {{ p.images }} obr.{% endif %}{% if p.video %} · ▶ video{% endif %}</span>
+      <span class="more">Otevřít →</span>
+    </div>
   </a>
   {% endfor %}
 </div>

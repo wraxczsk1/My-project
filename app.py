@@ -52,6 +52,20 @@ def manual_zip_bytes():
     return buf.getvalue()
 
 
+def module_preview(ci, mi, m):
+    blocks = parse(m["text"])
+    codes = [r for b in blocks if b["type"] == "codes" for r in b["rows"]]
+    return {
+        "sections": [b["text"] for b in blocks if b["type"] == "heading"][:3],
+        "lines": [b["text"] for b in blocks if b["type"] in ("bullet", "para", "quote", "warn")][:3],
+        "codes": codes[:6],
+        "code_count": len(codes),
+        "images": len(m["obrazky"]),
+        "video": bool(m["video"]),
+        "pages": len(module_pages(ci, mi)),
+    }
+
+
 def create_app():
     app = Flask(__name__)
 
@@ -67,8 +81,7 @@ def create_app():
     @app.route("/k/<cat>")
     def category(cat):
         ci, c = find_category(cat)
-        previews = [[b["text"] for b in parse(m["text"]) if "text" in b and b["type"] != "heading"][:3]
-                    for m in c["moduly"]]
+        previews = [module_preview(ci, mi, m) for mi, m in enumerate(c["moduly"])]
         return render_template("category.html", c=c, ci=ci, previews=previews, active_cat=c["slug"])
 
     @app.route("/k/<cat>/<mod>")
