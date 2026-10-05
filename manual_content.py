@@ -219,15 +219,18 @@ MANUAL = [
 ! Střelba po LEO → odtah na 7 dní
 """),
         modul("Hodnosti a volací znaky", """
+Hodnost + volací znak, který používáš na vysílačce.
 # Vedení
 Staff-1 | Chief of Police | info
 Staff-2 | Assistant Chief of Police | info
 Staff-3 | Deputy Chief of Police | info
 Staff-4 | Commander | info
-# Velitelé a officeři
+# Velitelé
 Nora | Captain | info
 Henry | Lieutenant | info
-John | Sergeant / Sergeant II | info
+John | Sergeant II | info
+John | Sergeant | info
+# Officeři
 Lincoln | Police Officers | info
 """),
     ]),

@@ -35,7 +35,7 @@
         <small>Kurz {{ '%02d'|format(loop.index) }} · {{ n }} {{ 'lekce' if n < 5 else 'lekcí' }}</small>
         <b>{{ c.nazev }}</b>
       </span>
-      <span class="course-icon">{{ c.ikona }}</span>
+      <span class="course-icon">{% include "_icon.html" %}</span>
     </a>
     <ol class="lesson-list">
       {% for m in c.moduly %}{% set p = previews[ci][loop.index0] %}

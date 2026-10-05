@@ -9,7 +9,7 @@
     <span class="kicker">Výcvikový kurz {{ '%02d'|format(ci + 1) }} · {{ n }} {{ 'lekce' if n < 5 else 'lekcí' }}</span>
     <h1>{{ c.nazev }}</h1>
   </div>
-  <span class="course-icon big">{{ c.ikona }}</span>
+  <span class="course-icon big">{% include "_icon.html" %}</span>
 </section>
 
 <div class="lesson-grid" style="--cat: {{ c.barva }}">

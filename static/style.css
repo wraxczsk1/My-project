@@ -335,3 +335,7 @@ main { flex: 1; min-width: 0; padding: 34px 38px 60px; max-width: 1420px; }
   text-transform: uppercase; color: color-mix(in srgb, var(--chip) 75%, #000); background: color-mix(in srgb, var(--chip) 14%, #fff);
 }
 .code-tile[hidden], .lesson .codes[hidden], .lesson .tag[hidden] { display: none; }
+
+/* category icons */
+.course-icon { color: color-mix(in srgb, var(--cat) 55%, #fff); box-shadow: inset 0 0 18px color-mix(in srgb, var(--cat) 25%, transparent); }
+.course-icon .icon { width: 60%; height: 60%; filter: drop-shadow(0 0 6px color-mix(in srgb, var(--cat) 70%, transparent)); }
