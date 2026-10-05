@@ -140,3 +140,4 @@ table.matrix th.cat { border-top: 4px solid var(--cat); color: var(--cat); }
 .cat-panel { border-top: 4px solid var(--cat); }
 .cat-panel h3 { color: var(--cat); }
 .brand { font-size: 17px; white-space: nowrap; }
+.brand small { white-space: normal; }
