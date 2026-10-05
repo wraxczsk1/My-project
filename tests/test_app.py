@@ -77,3 +77,15 @@ def test_parse_markup():
     assert [b["type"] for b in blocks] == ["heading", "bullet", "warn", "quote", "codes", "para"]
     assert [r["kind"] for r in blocks[4]["rows"]] == ["oznameni", "info"]
     assert "info" not in CODE_COLORS
+
+
+def test_static_build(tmp_path):
+    from freeze import build
+
+    out = build(tmp_path / "dist")
+    home = (out / "index.html").read_text(encoding="utf-8")
+    assert 'href="/k/zaklady-sluzby/index.html"' in home
+    assert (out / "k/zaklady-sluzby/kody/index.html").exists()
+    assert (out / "png/zaklady-sluzby/kody/1.png").read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"
+    assert (out / "lspd-manual.zip").exists()
+    assert (out / "static/style.css").exists()

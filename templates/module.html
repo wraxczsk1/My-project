@@ -50,7 +50,7 @@
       <a href="{{ url_for('module_image', cat=c.slug, mod=m.slug, page=p) }}" target="_blank">
         <img src="{{ url_for('module_image', cat=c.slug, mod=m.slug, page=p) }}" alt="PNG {{ p }}" loading="lazy">
       </a>
-      <a class="btn small full" href="{{ url_for('module_image', cat=c.slug, mod=m.slug, page=p, download=1) }}">⬇ Stáhnout{% if pages > 1 %} {{ p }}/{{ pages }}{% endif %}</a>
+      <a class="btn small full" href="{{ url_for('module_image', cat=c.slug, mod=m.slug, page=p) }}" download="{{ '%02d'|format(ci + 1) }}-{{ m.slug }}{% if pages > 1 %}-{{ p }}{% endif %}.png">⬇ Stáhnout{% if pages > 1 %} {{ p }}/{{ pages }}{% endif %}</a>
     </figure>
     {% endfor %}
   </aside>
