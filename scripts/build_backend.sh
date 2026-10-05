@@ -24,25 +24,20 @@ app = FastAPI()
 app.mount("/", WSGIMiddleware(flask_app))
 PY
 cat > "$OUT/pyproject.toml" <<'TOML'
-[tool.poetry]
+[project]
 name = "app"
 version = "0.1.0"
 description = "LSPD MANUAL"
-authors = ["LSPD Academy <lspd@example.com>"]
-
-[tool.poetry.dependencies]
-python = "^3.10"
-fastapi = {extras = ["standard"], version = ">=0.110,<1"}
-uvicorn = ">=0.29,<1"
-a2wsgi = ">=1.10,<2"
-Flask = ">=3.0,<4"
-Pillow = ">=10.4,<12"
-Authlib = ">=1.3,<2"
-requests = ">=2.31,<3"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi[standard]>=0.110,<1",
+    "uvicorn>=0.29,<1",
+    "a2wsgi>=1.10,<2",
+    "Flask>=3.0,<4",
+    "Pillow>=10.4,<12",
+    "Authlib>=1.3,<2",
+    "requests>=2.31,<3",
+]
 TOML
-(cd "$OUT" && ${POETRY:-poetry} lock -q)
+(cd "$OUT" && ${UV:-uv} lock -q)
 echo "$OUT"
