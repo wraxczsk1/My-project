@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}SQL dotazy{% endblock %}
+{% block content %}
+<h1>SQL dotazy <span class="muted">(jen čtení)</span></h1>
+<form method="post" class="panel">
+  <textarea name="query" rows="6" placeholder="SELECT * FROM nazev_tabulky LIMIT 10">{{ query }}</textarea>
+  <div class="actions"><button class="btn primary">Spustit</button></div>
+</form>
+{% if error %}<div class="flash error">{{ error }}</div>{% endif %}
+{% if result %}
+  {% if result.headers %}
+  <div class="table-wrap">
+  <table class="data">
+    <thead><tr>{% for h in result.headers %}<th>{{ h }}</th>{% endfor %}</tr></thead>
+    <tbody>
+      {% for r in result.rows %}
+        <tr>{% for v in r %}<td>{% if v is none %}<span class="null">—</span>{% else %}{{ v }}{% endif %}</td>{% endfor %}</tr>
+      {% else %}
+        <tr><td colspan="{{ result.headers|length }}" class="muted center">Žádné výsledky</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  <p class="muted">{{ result.rows|length }} řádků (max. 1000)</p>
+  {% else %}
+  <p class="muted">Dotaz proběhl bez výsledků.</p>
+  {% endif %}
+{% endif %}
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Upravit' if row_id else 'Nový' }} záznam · {{ table }}{% endblock %}
+{% block content %}
+<h1>{{ table }}: {{ 'upravit záznam #' ~ row_id if row_id else 'nový záznam' }}</h1>
+<form method="post" class="panel">
+  {% for c in columns %}
+    {% set v = row[c.name] if c.name in row.keys() else none %}
+    {% if c.type == 'BOOLEAN' %}
+      <label class="checkbox">
+        <input type="checkbox" name="{{ c.name }}" value="1" {% if v and v not in ('0', 0) %}checked{% endif %}>
+        {{ c.name }}
+      </label>
+    {% else %}
+      <label>{{ c.name }} <small class="muted">{{ column_types.get(c.type, c.type) }}</small>
+        <input name="{{ c.name }}"
+               value="{{ '' if v is none else v }}"
+               {% if c.type == 'INTEGER' %}type="number" step="1"
+               {% elif c.type == 'REAL' %}type="number" step="any"
+               {% elif c.type == 'DATE' %}type="date"
+               {% else %}type="text"{% endif %}>
+      </label>
+    {% endif %}
+  {% endfor %}
+  <div class="actions">
+    <button class="btn primary">Uložit</button>
+    <a class="btn" href="{{ url_for('view_table', table=table) }}">Zpět</a>
+  </div>
+</form>
+{% endblock %}

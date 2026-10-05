@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Nová tabulka{% endblock %}
+{% block content %}
+<h1>Nová tabulka</h1>
+<form method="post" class="panel">
+  <label>Název tabulky
+    <input name="name" required value="{{ form.get('name', '') }}" placeholder="např. hraci">
+  </label>
+  <p class="muted">Názvy: písmena, číslice a podtržítko, nesmí začínat číslicí. Sloupec <code>id</code> se přidá automaticky.</p>
+  <h3>Sloupce</h3>
+  <div id="columns">
+    {% set names = form.getlist('col_name') if form.getlist is defined else [] %}
+    {% set types = form.getlist('col_type') if form.getlist is defined else [] %}
+    {% if names %}
+      {% for i in range(names|length) %}
+        {% with name=names[i], type=types[i], removable=true %}{% include "_column_row.html" %}{% endwith %}
+      {% endfor %}
+    {% else %}
+      {% with name='', type='TEXT', removable=true %}{% include "_column_row.html" %}{% endwith %}
+    {% endif %}
+  </div>
+  <template id="col-template">{% with name='', type='TEXT', removable=true %}{% include "_column_row.html" %}{% endwith %}</template>
+  <button type="button" class="btn" id="add-col">+ Přidat sloupec</button>
+  <div class="actions">
+    <button class="btn primary">Vytvořit tabulku</button>
+  </div>
+</form>
+{% endblock %}
+{% block scripts %}
+<script>
+  document.getElementById('add-col').addEventListener('click', function () {
+    var tpl = document.getElementById('col-template');
+    document.getElementById('columns').appendChild(tpl.content.cloneNode(true));
+  });
+  document.getElementById('columns').addEventListener('click', function (e) {
+    if (e.target.classList.contains('remove-col')) e.target.closest('.col-row').remove();
+  });
+</script>
+{% endblock %}

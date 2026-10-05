@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Přehled{% endblock %}
+{% block content %}
+<div class="header">
+  <h1>Přehled databáze</h1>
+  <a class="btn primary" href="{{ url_for('create_table') }}">+ Nová tabulka</a>
+</div>
+{% if tables %}
+<div class="cards">
+  {% for t in tables %}
+  <a class="card" href="{{ url_for('view_table', table=t.name) }}">
+    <h2>{{ t.name }}</h2>
+    <p>{{ t.rows }} záznamů · {{ t.columns }} sloupců</p>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty">
+  <p>Databáze je prázdná. Začni vytvořením první tabulky.</p>
+  <a class="btn primary" href="{{ url_for('create_table') }}">Vytvořit tabulku</a>
+</div>
+{% endif %}
+{% endblock %}

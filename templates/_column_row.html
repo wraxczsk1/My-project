@@ -1,0 +1,9 @@
+<div class="col-row">
+  <input name="col_name" placeholder="název sloupce" value="{{ name or '' }}">
+  <select name="col_type">
+    {% for key, label in column_types.items() %}
+      <option value="{{ key }}" {% if key == type %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+  {% if removable %}<button type="button" class="btn small remove-col" title="Odebrat">×</button>{% endif %}
+</div>
