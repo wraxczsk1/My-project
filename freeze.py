@@ -1,4 +1,5 @@
 """Build a static copy of LSPD MANUAL into ./dist for public hosting."""
+import os
 import re
 import shutil
 import sys
@@ -9,6 +10,7 @@ from manual_content import MANUAL
 from manual_png import module_pages
 
 PAGE_LINK = re.compile(r'href="(/k/[^"?#]+)"')
+ROOT_URL = re.compile(r'(?P<attribute>\b(?:href|src)=")(?P<url>/[^"?#]*)')
 
 
 def page_urls():
@@ -34,6 +36,7 @@ def file_urls():
 
 def build(out):
     out = Path(out)
+    base_path = os.environ.get("STATIC_BASE_PATH", "").rstrip("/")
     if out.exists():
         shutil.rmtree(out)
     shutil.copytree(Path(app.root_path) / "static", out / "static")
@@ -42,7 +45,18 @@ def build(out):
     for url in page_urls():
         resp = client.get(url)
         assert resp.status_code == 200, url
-        html = PAGE_LINK.sub(r'href="\1/index.html"', resp.get_data(as_text=True))
+        html = PAGE_LINK.sub(
+            lambda match: f'href="{base_path}{match.group(1)}/index.html"',
+            resp.get_data(as_text=True),
+        )
+
+        def add_base_path(match):
+            url = match.group("url")
+            if base_path and not (url == base_path or url.startswith(f"{base_path}/")):
+                url = f"{base_path}{url}"
+            return f'{match.group("attribute")}{url}'
+
+        html = ROOT_URL.sub(add_base_path, html)
         target = out / url.lstrip("/") / "index.html"
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(html, encoding="utf-8")
