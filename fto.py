@@ -1,19 +1,17 @@
-"""FTO MANAGE – správa kurzů a lekcí pro povolené FTO (přihlášení přes Google)."""
+"""FTO MANAGE – správa kurzů a lekcí chráněná heslem."""
 import os
 import secrets
 import uuid
 import hmac
 from functools import wraps
 
-from authlib.integrations.flask_client import OAuth
-from flask import Blueprint, abort, current_app, flash, redirect, render_template, request, session, url_for
+from flask import Blueprint, abort, flash, redirect, render_template, request, session, url_for
 from werkzeug.utils import secure_filename
 
 import manual_store as store
 from manual_content import MANUAL, modul
 
 bp = Blueprint("fto", __name__, url_prefix="/fto")
-oauth = OAuth()
 
 ICONS = {
     "stit": "Štít",
@@ -31,8 +29,8 @@ ICONS = {
 
 
 def current_fto():
-    email = session.get("fto")
-    return email if email and email in store.fto_emails() else None
+    owner = store.OWNER_EMAILS[0]
+    return owner if session.get("fto") == owner else None
 
 
 def csrf_token():
@@ -42,16 +40,6 @@ def csrf_token():
 
 
 def init_app(app):
-    app.config.setdefault("GOOGLE_CLIENT_ID", os.environ.get("GOOGLE_CLIENT_ID"))
-    app.config.setdefault("GOOGLE_CLIENT_SECRET", os.environ.get("GOOGLE_CLIENT_SECRET"))
-    oauth.init_app(app)
-    if app.config["GOOGLE_CLIENT_ID"]:
-        oauth.register(
-            "google",
-            server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
-            client_kwargs={"scope": "openid email profile"},
-            overwrite=True,
-        )
     app.register_blueprint(bp)
     app.context_processor(lambda: {"fto_user": current_fto(), "csrf_token": csrf_token, "icons": ICONS})
 
@@ -118,29 +106,10 @@ def login():
             session["fto"] = store.OWNER_EMAILS[0]
             return redirect(url_for("fto.dashboard"))
         flash("Nesprávné heslo.", "error")
-    if not current_app.config["GOOGLE_CLIENT_ID"] and not os.environ.get("FTO_PASSWORD"):
+    if not os.environ.get("FTO_PASSWORD"):
         return render_template("fto/message.html", title="Přihlášení není nastavené",
-                               text="Přihlášení přes Google ani heslem zatím není zapnuté. Kontaktuj správce webu."), 503
-    if request.args.get("go") and current_app.config["GOOGLE_CLIENT_ID"]:
-        return oauth.google.authorize_redirect(url_for("fto.callback", _external=True))
+                               text="Přihlášení heslem zatím není zapnuté. Kontaktuj správce webu."), 503
     return render_template("fto/login.html")
-
-
-@bp.route("/callback")
-def callback():
-    try:
-        token = oauth.google.authorize_access_token()
-    except Exception:
-        return render_template("fto/message.html", title="Přihlášení selhalo",
-                               text="Přihlášení přes Google se nepovedlo. Zkus to znovu."), 400
-    info = token.get("userinfo") or {}
-    email = (info.get("email") or "").lower()
-    if not info.get("email_verified") or email not in store.fto_emails():
-        session.pop("fto", None)
-        return render_template("fto/message.html", title="Přístup odepřen",
-                               text=f"Účet {email or '?'} nemá oprávnění FTO MANAGE."), 403
-    session["fto"] = email
-    return redirect(url_for("fto.dashboard"))
 
 
 @bp.route("/logout", methods=["POST"])
@@ -240,22 +209,3 @@ def lesson_move(ci, mi, direction):
     move(c["moduly"], mi, direction)
     store.save()
     return redirect(url_for("fto.dashboard") + f"#kurz-{ci}")
-
-
-@bp.route("/pristup", methods=["POST"])
-@fto_required
-def access():
-    emails = [e for e in store.fto_emails() if e not in store.OWNER_EMAILS]
-    add = request.form.get("pridat", "").strip().lower()
-    remove = request.form.get("odebrat", "").strip().lower()
-    if add:
-        if "@" not in add:
-            flash("Zadej platný e-mail.", "error")
-        else:
-            emails.append(add)
-            flash(f"{add} má teď přístup do FTO MANAGE.", "ok")
-    if remove in emails:
-        emails.remove(remove)
-        flash(f"{remove} už nemá přístup.", "ok")
-    store.set_fto_emails(emails)
-    return redirect(url_for("fto.dashboard") + "#pristup")

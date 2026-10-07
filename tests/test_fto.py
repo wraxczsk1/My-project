@@ -94,14 +94,8 @@ def test_course_and_lesson_crud(app, tmp_path):
     assert len(MANUAL) == count and client.get("/k/patrani").status_code == 404
 
 
-def test_access_list(app):
+def test_email_access_management_is_removed(app):
     client = app.test_client()
     login(client)
-    client.post("/fto/pristup", data={"csrf": "t", "pridat": "Kolega@Gmail.com"})
-    assert "kolega@gmail.com" in store.fto_emails()
-    login(client, "kolega@gmail.com")
-    assert client.get("/fto/").status_code == 200
-    login(client)
-    client.post("/fto/pristup", data={"csrf": "t", "odebrat": "kolega@gmail.com"})
-    assert "kolega@gmail.com" not in store.fto_emails()
-    assert OWNER in store.fto_emails()
+    assert client.get("/fto/").get_data(as_text=True).find("Přístup do FTO MANAGE") == -1
+    assert client.post("/fto/pristup", data={"csrf": "t", "pridat": "Kolega@Gmail.com"}).status_code == 404

@@ -42,21 +42,4 @@
 </section>
 {% endfor %}
 
-<section class="fto-card" id="pristup">
-  <h2>Přístup do FTO MANAGE</h2>
-  <p class="muted">Tyhle Google účty vidí tlačítko FTO MANAGE a můžou upravovat výcvik.</p>
-  <ul class="fto-emails">
-    {% for e in emails %}
-    <li><span class="grow">{{ e }}</span>
-      {% if e in owners %}<span class="pill">správce</span>{% else %}
-      <form method="post" action="{{ url_for('fto.access') }}"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><input type="hidden" name="odebrat" value="{{ e }}"><button class="btn sm danger">Odebrat</button></form>{% endif %}
-    </li>
-    {% endfor %}
-  </ul>
-  <form class="fto-inline" method="post" action="{{ url_for('fto.access') }}">
-    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
-    <input type="email" name="pridat" placeholder="email@gmail.com" required>
-    <button class="btn gold">Přidat FTO</button>
-  </form>
-</section>
 {% endblock %}
