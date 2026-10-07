@@ -62,7 +62,7 @@ def pull():
     if not gh:
         return
     _gh_ensure_branch(gh)
-    for name in ("manual.json", "fto.json"):
+    for name in ("manual.json", "fto.json", "tests.json"):
         _gh_download(gh, name)
     r = requests.get(_gh_url(gh, "uploads"), headers=gh["headers"], params={"ref": gh["branch"]}, timeout=30)
     if r.status_code == 200:
