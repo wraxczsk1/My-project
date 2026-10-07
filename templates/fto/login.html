@@ -4,7 +4,21 @@
 <section class="fto-card fto-narrow">
   <span class="fto-tag">FTO MANAGE</span>
   <h1>Přihlášení FTO</h1>
-  <p>Správa kurzů a lekcí je jen pro Field Training Officery s povoleným Google účtem.</p>
-  <a class="btn gold" href="{{ url_for('fto.login', go=1) }}">Přihlásit přes Google</a>
+  <p>Správa kurzů a lekcí je chráněná heslem.</p>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="flash {{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+  <form method="post" class="fto-login-form">
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    <label for="password">Heslo</label>
+    <input id="password" name="password" type="password" autocomplete="current-password" required autofocus>
+    <button class="btn gold" type="submit">Přihlásit</button>
+  </form>
+  {% if config.GOOGLE_CLIENT_ID %}
+    <p class="fto-login-alt">Nebo použij Google účet:</p>
+    <a class="btn" href="{{ url_for('fto.login', go=1) }}">Přihlásit přes Google</a>
+  {% endif %}
 </section>
 {% endblock %}

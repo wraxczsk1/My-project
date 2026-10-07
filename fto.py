@@ -2,6 +2,7 @@
 import os
 import secrets
 import uuid
+import hmac
 from functools import wraps
 
 from authlib.integrations.flask_client import OAuth
@@ -106,14 +107,21 @@ def save_uploads(files, prefix):
     return names
 
 
-@bp.route("/login")
+@bp.route("/login", methods=["GET", "POST"])
 def login():
     if current_fto():
         return redirect(url_for("fto.dashboard"))
-    if not current_app.config["GOOGLE_CLIENT_ID"]:
+    if request.method == "POST":
+        password = request.form.get("password", "")
+        configured_password = os.environ.get("FTO_PASSWORD", "")
+        if configured_password and hmac.compare_digest(password, configured_password):
+            session["fto"] = store.OWNER_EMAILS[0]
+            return redirect(url_for("fto.dashboard"))
+        flash("Nesprávné heslo.", "error")
+    if not current_app.config["GOOGLE_CLIENT_ID"] and not os.environ.get("FTO_PASSWORD"):
         return render_template("fto/message.html", title="Přihlášení není nastavené",
-                               text="Přihlášení přes Google zatím není zapnuté. Kontaktuj správce webu."), 503
-    if request.args.get("go"):
+                               text="Přihlášení přes Google ani heslem zatím není zapnuté. Kontaktuj správce webu."), 503
+    if request.args.get("go") and current_app.config["GOOGLE_CLIENT_ID"]:
         return oauth.google.authorize_redirect(url_for("fto.callback", _external=True))
     return render_template("fto/login.html")
 

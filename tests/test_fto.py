@@ -36,6 +36,20 @@ def test_fto_hidden_for_public(app):
     assert client.get("/fto/").status_code == 302
 
 
+def test_password_login(monkeypatch, tmp_path):
+    monkeypatch.setenv("FTO_PASSWORD", "LSPD 921830")
+    app = create_app({"DATA_DIR": str(tmp_path), "TESTING": True})
+    client = app.test_client()
+    with client.session_transaction() as s:
+        s["csrf"] = "t"
+    response = client.post("/fto/login", data={"csrf": "t", "password": "wrong"})
+    assert response.status_code == 200
+    assert "Nesprávné heslo" in response.get_data(as_text=True)
+    response = client.post("/fto/login", data={"csrf": "t", "password": "LSPD 921830"})
+    assert response.status_code == 302
+    assert response.location.endswith("/fto/")
+
+
 def test_owner_sees_button_and_dashboard(app):
     client = app.test_client()
     login(client)
