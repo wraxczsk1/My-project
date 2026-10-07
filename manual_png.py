@@ -455,14 +455,6 @@ def to_png(img):
 
 
 @lru_cache(maxsize=None)
-def module_page_count(ci, mi):
-    """Return the number of PNG pages without rendering or encoding the PNGs."""
-    category = MANUAL[ci]
-    module = category["moduly"][mi]
-    return len(paginate(module_units(module, category["barva"])))
-
-
-@lru_cache(maxsize=None)
 def module_pages(ci, mi):
     category = MANUAL[ci]
     module = category["moduly"][mi]

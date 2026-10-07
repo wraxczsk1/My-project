@@ -11,7 +11,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 import fto
 import manual_store as store
 from manual_content import MANUAL
-from manual_png import CODE_COLORS, CODE_LABELS, image_path, module_page_count, module_pages, overview_png, parse
+from manual_png import CODE_COLORS, CODE_LABELS, image_path, module_pages, overview_png, parse
 
 
 def find_category(cat):
@@ -68,13 +68,13 @@ def module_preview(ci, mi, m):
         "code_count": len(codes),
         "images": len(m["obrazky"]),
         "video": bool(m["video"]),
-        "pages": module_page_count(ci, mi),
+        # Rendering PNG pages is intentionally deferred until a lesson is opened.
+        "pages": 1,
     }
 
 
 @store.on_change
 def clear_caches():
-    module_page_count.cache_clear()
     module_pages.cache_clear()
     overview_png.cache_clear()
     manual_zip_bytes.cache_clear()
