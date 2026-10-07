@@ -177,7 +177,7 @@ def test_form(test_id=None):
         questions = []
         for question_id in request.form.getlist("q_id"):
             old = next((q for q in (test or {}).get("questions", []) if q.get("id") == question_id), {})
-            image = _test_image(request.files.get(f"q_image_{question_id}")) or old.get("image")
+            image = None if request.form.get(f"q_remove_image_{question_id}") else (_test_image(request.files.get(f"q_image_{question_id}")) or old.get("image"))
             # Existing question fields use their id in the field names.
             question = {
                 "id": question_id,
