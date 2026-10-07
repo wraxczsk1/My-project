@@ -118,6 +118,94 @@ def logout():
     return redirect(url_for("index"))
 
 
+def _test_image(file):
+    if not file or not file.filename:
+        return None
+    ext = os.path.splitext(file.filename)[1].lower()
+    if ext not in store.IMAGE_EXT:
+        flash("Obrázek musí být PNG, JPG nebo WEBP.", "error")
+        return None
+    name = secure_filename(f"test-{uuid.uuid4().hex[:10]}{ext}")
+    folder = os.path.join(store.upload_dir(), "tests")
+    os.makedirs(folder, exist_ok=True)
+    file.save(os.path.join(folder, name))
+    store.push(f"uploads/tests/{name}")
+    return name
+
+
+def _question_from_form(form, prefix, image_file=None, question_id=None):
+    text = form.get(f"{prefix}text", "").strip()
+    if not text:
+        return None
+    kind = form.get(f"{prefix}kind", "choice")
+    if kind not in {"choice", "situation"}:
+        kind = "choice"
+    answers = [form.get(f"{prefix}{letter}", "").strip() for letter in ("a", "b", "c")]
+    try:
+        correct = max(0, min(2, int(form.get(f"{prefix}correct", 0))))
+    except (TypeError, ValueError):
+        correct = 0
+    return {
+        "id": question_id or uuid.uuid4().hex[:12],
+        "text": text,
+        "kind": kind,
+        "answers": answers,
+        "correct": correct,
+        "image": image_file,
+    }
+
+
+@bp.route("/testy")
+@fto_required
+def tests():
+    return render_template("fto/tests.html", tests=store.tests())
+
+
+@bp.route("/testy/novy", methods=["GET", "POST"])
+@bp.route("/testy/<test_id>/upravit", methods=["GET", "POST"])
+@fto_required
+def test_form(test_id=None):
+    items = store.tests()
+    test = next((item for item in items if item.get("id") == test_id), None) if test_id else None
+    if test_id and not test:
+        abort(404)
+    if request.method == "POST":
+        title = request.form.get("title", "").strip()
+        if not title:
+            flash("Test musí mít název.", "error")
+            return render_template("fto/test_form.html", test=test)
+        questions = []
+        for question_id in request.form.getlist("q_id"):
+            old = next((q for q in (test or {}).get("questions", []) if q.get("id") == question_id), {})
+            image = _test_image(request.files.get(f"q_image_{question_id}")) or old.get("image")
+            # Existing question fields use their id in the field names.
+            question = {
+                "id": question_id,
+                "text": request.form.get(f"q_text_{question_id}", "").strip(),
+                "kind": request.form.get(f"q_kind_{question_id}", "choice"),
+                "answers": [request.form.get(f"q_{letter}_{question_id}", "").strip() for letter in ("a", "b", "c")],
+                "correct": int(request.form.get(f"q_correct_{question_id}", 0) or 0),
+                "image": image,
+            }
+            if question["text"]:
+                question["kind"] = question["kind"] if question["kind"] in {"choice", "situation"} else "choice"
+                question["correct"] = max(0, min(2, question["correct"]))
+                questions.append(question)
+        new_question = _question_from_form(request.form, "new_", _test_image(request.files.get("new_image")))
+        if new_question:
+            questions.append(new_question)
+        payload = {"id": test["id"] if test else uuid.uuid4().hex[:12], "title": title,
+                   "description": request.form.get("description", "").strip(), "questions": questions}
+        if test:
+            items[items.index(test)] = payload
+        else:
+            items.append(payload)
+        store.save_tests(items)
+        flash("Test byl uložen.", "ok")
+        return redirect(url_for("fto.tests"))
+    return render_template("fto/test_form.html", test=test)
+
+
 @bp.route("/")
 @fto_required
 def dashboard():

@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block title %}Výsledek testu{% endblock %}
+{% block content %}
+<section class="fto-card result-card"><span class="fto-tag">VÝSLEDEK</span><h1>{{ test.title }}</h1><div class="result-score">{{ score }} / {{ total }}</div><p>{{ message }}</p><a class="btn gold" href="{{ url_for('tests_index') }}">Zpět na testy</a></section>
+{% endblock %}

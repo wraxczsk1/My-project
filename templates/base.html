@@ -23,6 +23,7 @@
     {% endfor %}
   </nav>
   <div class="side-foot">
+    <a class="btn tests-btn full" href="{{ url_for('tests_index') }}">✦ TESTY PRO KADETY</a>
     {% if fto_user %}<a class="btn fto-btn full {{ 'active' if request.blueprint == 'fto' }}" href="{{ url_for('fto.dashboard') }}">★ FTO MANAGE</a>{% endif %}
     <a class="btn gold full" href="{{ url_for('manual_zip') }}">⬇ Stáhnout vše (ZIP)</a>
     <small>Pouze pro výcvik kadetů LSPD{% if not fto_user and not config.STATIC_BUILD %} · <a class="fto-login" href="{{ url_for('fto.login') }}">FTO</a>{% endif %}</small>

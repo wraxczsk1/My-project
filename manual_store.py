@@ -136,6 +136,14 @@ def save():
         fn()
 
 
+def tests():
+    return _read("tests.json", [])
+
+
+def save_tests(items):
+    _write("tests.json", items)
+
+
 def fto_emails():
     return sorted(set(OWNER_EMAILS) | set(_read("fto.json", [])))
 

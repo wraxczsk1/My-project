@@ -5,6 +5,7 @@
 <header class="fto-top">
   <div><span class="fto-tag">FTO MANAGE</span><h1>Správa výcviku</h1><p>Přihlášen: <b>{{ fto_user }}</b></p></div>
   <div class="fto-actions">
+    <a class="btn gold" href="{{ url_for('fto.tests') }}">Testy pro kadety</a>
     <a class="btn gold" href="{{ url_for('fto.course_form') }}">+ Nový kurz</a>
     <form method="post" action="{{ url_for('fto.logout') }}"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><button class="btn">Odhlásit</button></form>
   </div>

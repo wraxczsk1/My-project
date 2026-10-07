@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Testy pro kadety{% endblock %}
+{% block content %}
+<div class="crumbs"><a href="{{ url_for('index') }}">Přehled</a><span>›</span><b>Testy pro kadety</b></div>
+<section class="file-head" style="--cat: #d4a017"><div><span class="kicker">LSPD ACADEMY</span><h1>Testy pro kadety</h1><p>Procvič si znalosti z výcvikových kurzů.</p></div></section>
+<div class="test-grid">
+{% for test in tests %}
+  <article class="test-card"><span class="test-type">TEST</span><h2>{{ test.title }}</h2><p>{{ test.description }}</p><small>{{ test.questions|length }} otázek</small><a class="btn gold" href="{{ url_for('test_detail', test_id=test.id) }}">Spustit test →</a></article>
+{% else %}<section class="fto-card"><h2>Zatím nejsou vytvořené žádné testy</h2><p class="muted">FTO může vytvořit první test v administraci.</p></section>{% endfor %}
+</div>
+{% endblock %}

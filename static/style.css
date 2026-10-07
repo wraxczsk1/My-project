@@ -405,3 +405,25 @@ main { flex: 1; min-width: 0; padding: 34px 38px 60px; max-width: 1420px; }
 .flash { padding: 10px 14px; margin: 0 0 14px; border-left: 4px solid var(--gold); background: rgba(212,160,23,.1); }
 .flash.error { border-color: #dc2626; background: rgba(220,38,38,.12); }
 @media (max-width: 900px) { .fto-split { grid-template-columns: 1fr; } }
+
+/* Kadet tests */
+.tests-btn { background: linear-gradient(180deg, #1d3768, #10264c); border-color: var(--gold); color: var(--gold-2); }
+.test-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
+.test-card { display: flex; flex-direction: column; gap: 12px; padding: 22px; background: var(--panel); border: 1px solid var(--border); border-top: 3px solid var(--gold); }
+.test-card h2 { margin: 0; font-size: 25px; }
+.test-card p { color: var(--muted); margin: 0; line-height: 1.5; flex: 1; }
+.test-card small, .test-type { color: var(--gold); font-family: var(--head); font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.test-form { max-width: 920px; display: grid; gap: 18px; }
+.test-question { margin: 0; padding: 22px; background: #f4f6fa; color: #1c2230; border: 0; border-top: 4px solid var(--gold); }
+.test-question legend { padding: 0 8px; font-family: var(--head); font-weight: 700; font-size: 22px; }
+.answer-option { display: flex; align-items: center; gap: 10px; margin: 10px 0; padding: 13px 15px; background: #fff; border: 1px solid #d6dce8; cursor: pointer; }
+.answer-option span { font-family: var(--head); font-weight: 700; color: #9b7200; }
+.test-image { display: block; max-width: 100%; max-height: 420px; margin: 12px 0; object-fit: contain; }
+.result-card { max-width: 620px; text-align: center; margin: 30px auto; }
+.result-score { margin: 22px 0; color: var(--gold-2); font: 700 64px var(--head); }
+.question-editor { display: grid; gap: 12px; margin-top: 18px; padding: 18px; background: rgba(255,255,255,.04); border: 1px solid var(--border); }
+.question-editor label, .fto-form > section > label { display: grid; gap: 6px; color: var(--muted); font-size: 14px; }
+.question-editor input, .question-editor textarea, .question-editor select, .fto-form input, .fto-form textarea, .fto-form select { width: 100%; padding: 11px 12px; color: var(--text); background: var(--panel-2); border: 1px solid var(--border); font: inherit; }
+.answer-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.new-question { border-color: var(--gold); }
+@media (max-width: 700px) { .answer-row { grid-template-columns: 1fr; } .test-question { padding: 16px; } }

@@ -1,6 +1,7 @@
 import io
 import os
 import secrets
+import uuid
 import zipfile
 from collections import Counter
 from functools import lru_cache
@@ -174,6 +175,35 @@ def create_app(config=None):
             mimetype="application/zip",
             headers={"Content-Disposition": 'attachment; filename="lspd-manual.zip"'},
         )
+
+    @app.route("/testy")
+    def tests_index():
+        return render_template("tests/index.html", tests=store.tests())
+
+    @app.route("/testy/<test_id>", methods=["GET", "POST"])
+    def test_detail(test_id):
+        test = next((item for item in store.tests() if item.get("id") == test_id), None)
+        if not test:
+            abort(404)
+        if request.method == "POST":
+            score = 0
+            total = 0
+            for index, question in enumerate(test.get("questions", [])):
+                if question.get("kind") != "choice":
+                    continue
+                total += 1
+                if request.form.get(f"q{index}") == str(question.get("correct", 0)):
+                    score += 1
+            message = "Výborně, test máš splněný." if total and score == total else "Výsledek si projdi s FTO a zopakuj si chybné otázky."
+            return render_template("tests/result.html", test=test, score=score, total=total, message=message)
+        return render_template("tests/detail.html", test=test)
+
+    @app.route("/testy/<test_id>/obrazek/<filename>")
+    def test_image(test_id, filename):
+        path = os.path.join(store.upload_dir(), "tests", os.path.basename(filename))
+        if not os.path.isfile(path):
+            abort(404)
+        return send_file(path)
 
     return app
 

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}{{ test.title }}{% endblock %}
+{% block content %}
+<div class="crumbs"><a href="{{ url_for('tests_index') }}">Testy pro kadety</a><span>›</span><b>{{ test.title }}</b></div>
+<section class="file-head" style="--cat: #d4a017"><div><span class="kicker">KADET · TEST</span><h1>{{ test.title }}</h1><p>{{ test.description }}</p></div></section>
+<form method="post" class="test-form">
+{% for q in test.questions %}<fieldset class="test-question"><legend>{{ loop.index }}. {{ q.text }}</legend>
+  {% if q.image %}<img class="test-image" src="{{ url_for('test_image', test_id=test.id, filename=q.image) }}" alt="Obrázek k otázce {{ loop.index }}">{% endif %}
+  {% if q.kind == 'choice' %}
+    {% for answer in q.answers %}<label class="answer-option"><input type="radio" name="q{{ loop.index0 }}" value="{{ loop.index0 }}" required><span>{{ 'ABC'[loop.index0] }}.</span>{{ answer }}</label>{% endfor %}
+  {% else %}<textarea name="q{{ loop.index0 }}" rows="4" placeholder="Napiš odpověď…" required></textarea>{% endif %}
+</fieldset>{% endfor %}
+<button class="btn gold" type="submit">Odevzdat test</button>
+</form>
+{% endblock %}
