@@ -65,7 +65,6 @@ def _set_complex_collision(mesh):
         "collision_trace_flag",
         getattr(collision_enum, flag_name),
     )
-    mesh.mark_package_dirty()
     if not unreal.EditorAssetLibrary.save_asset(mesh.get_path_name(), False):
         raise RuntimeError("Nepodarilo se ulozit kolize meshe: " + mesh.get_path_name())
 
@@ -140,7 +139,7 @@ def _ensure_player_start():
     start = _spawn_actor(
         unreal.PlayerStart,
         "PlayerStart",
-        (0.0, 0.0, 12000.0),
+        (0.0, 0.0, 150.0),
         (0.0, 90.0, 0.0),
     )
     start.set_actor_label(MAP_PREFIX + "PlayerStart")

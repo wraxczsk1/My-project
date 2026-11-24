@@ -8,6 +8,7 @@
 
 class SVerticalBox;
 class STextBlock;
+class SOverlay;
 class UTexture2D;
 
 UCLASS()
@@ -30,17 +31,23 @@ private:
     void BuildDevLogScreen();
     void BuildPauseMenu();
     void BuildInventoryScreen();
+    void BuildSettingsScreen();
     TSharedRef<SWidget> MakeMenuButton(const FText& Label, const FOnClicked& OnClicked) const;
 
     FReply HandleSinglePlayer();
     FReply HandleMultiplayer();
     FReply HandleDevLog();
+    FReply HandleSettings();
     FReply HandleUpdates();
     FReply HandleExit();
     FReply HandleBack();
 
     TSharedPtr<SVerticalBox> Content;
     TSharedPtr<STextBlock> CombatStatusText;
+    TSharedPtr<SBorder> FullscreenBackground;
+    TSharedPtr<SBorder> MenuCardBorder;
+    TSharedPtr<SBorder> DevLogWindow;
+    TSharedPtr<SOverlay> GameplayOverlay;
     FSlateBrush LogoBrush;
     FString UpdateAvailableVersion;
 

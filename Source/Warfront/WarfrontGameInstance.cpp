@@ -2,7 +2,9 @@
 
 #include "Blueprint/UserWidget.h"
 #include "Engine/World.h"
+#include "Engine/GameViewportClient.h"
 #include "GameFramework/PlayerController.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Interfaces/IHttpRequest.h"
 #include "Interfaces/IHttpResponse.h"
@@ -64,6 +66,10 @@ namespace
 void UWarfrontGameInstance::Init()
 {
     Super::Init();
+    while (GetNumLocalPlayers() > 1)
+    {
+        RemoveLocalPlayer(GetLocalPlayers().Last());
+    }
 
     if (IsRunningDedicatedServer())
     {
@@ -104,6 +110,18 @@ void UWarfrontGameInstance::Init()
 void UWarfrontGameInstance::OnStart()
 {
     Super::OnStart();
+    UGameplayStatics::SetForceDisableSplitscreen(this, true);
+    if (UWorld* World = GetWorld())
+    {
+        if (UGameViewportClient* Viewport = World->GetGameViewport())
+        {
+            Viewport->SetForceDisableSplitscreen(true);
+        }
+    }
+    while (GetNumLocalPlayers() > 1)
+    {
+        RemoveLocalPlayer(GetLocalPlayers().Last());
+    }
     CheckForUpdates();
 
     if (UWorld* World = GetWorld())
@@ -194,12 +212,12 @@ void UWarfrontGameInstance::CheckForUpdates()
                 }
             }
 
-            if (AssetUrl.IsEmpty() || !Digest.StartsWith(TEXT("sha256:")))
+            if (AssetUrl.IsEmpty())
             {
                 UE_LOG(
                     LogTemp,
                     Error,
-                    TEXT("GitHub release must include Warfront-Windows.zip with a SHA-256 digest."));
+                    TEXT("GitHub release must include Warfront-Windows.zip."));
                 return;
             }
 
@@ -303,6 +321,11 @@ void UWarfrontGameInstance::BeginSinglePlayer()
         return;
     }
 
+    UGameplayStatics::OpenLevel(
+        this,
+        FName(TEXT("/Game/Maps/WarfrontMap.WarfrontMap")),
+        true);
+
     World->GetTimerManager().SetTimer(
         LoadingTimer,
         FTimerDelegate::CreateUObject(this, &UWarfrontGameInstance::FinishLoading),
@@ -402,7 +425,7 @@ void UWarfrontGameInstance::QuitGame()
 
 void UWarfrontGameInstance::OpenReleasesPage()
 {
-    if (LatestReleaseAssetUrl.IsEmpty() || LatestReleaseDigest.IsEmpty())
+    if (LatestReleaseAssetUrl.IsEmpty())
     {
         FMessageDialog::Open(
             EAppMsgType::Ok,

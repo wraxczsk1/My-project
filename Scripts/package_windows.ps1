@@ -69,6 +69,9 @@ if (Test-Path -LiteralPath $archivePath) {
 Compress-Archive -Path (Join-Path $gameExecutable.DirectoryName '*') `
     -DestinationPath $archivePath -CompressionLevel Optimal
 
+$sha256 = (Get-FileHash -LiteralPath $archivePath -Algorithm SHA256).Hash.ToLowerInvariant()
+Set-Content -LiteralPath "$archivePath.sha256" -Value "sha256:$sha256" -Encoding ASCII
+
 Write-Output "Game executable: $($gameExecutable.FullName)"
 Write-Output "Play folder: $($playExecutable.DirectoryName)"
 Write-Output "Release package: $archivePath"

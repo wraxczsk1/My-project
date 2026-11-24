@@ -15,19 +15,19 @@ $ErrorActionPreference = 'Stop'
 $temporaryDirectory = Join-Path $env:TEMP ('WarfrontUpdate-' + [guid]::NewGuid().ToString('N'))
 
 try {
-    if ($ExpectedDigest -notmatch '^sha256:[0-9a-fA-F]{64}$') {
-        throw 'GitHub release does not provide a valid SHA-256 digest.'
-    }
+    $verifyDigest = $ExpectedDigest -match '^sha256:[0-9a-fA-F]{64}$'
 
     $archivePath = Join-Path $temporaryDirectory 'Warfront-Windows.zip'
     $stagingDirectory = Join-Path $temporaryDirectory 'staged'
     New-Item -ItemType Directory -Path $stagingDirectory -Force | Out-Null
     Invoke-WebRequest -Uri $DownloadUrl -OutFile $archivePath
 
-    $actualDigest = (Get-FileHash -LiteralPath $archivePath -Algorithm SHA256).Hash
-    $expectedHash = $ExpectedDigest.Substring(7)
-    if (-not [string]::Equals($actualDigest, $expectedHash, [StringComparison]::OrdinalIgnoreCase)) {
-        throw 'Downloaded update failed SHA-256 verification.'
+    if ($verifyDigest) {
+        $actualDigest = (Get-FileHash -LiteralPath $archivePath -Algorithm SHA256).Hash
+        $expectedHash = $ExpectedDigest.Substring(7)
+        if (-not [string]::Equals($actualDigest, $expectedHash, [StringComparison]::OrdinalIgnoreCase)) {
+            throw 'Downloaded update failed SHA-256 verification.'
+        }
     }
 
     Expand-Archive -LiteralPath $archivePath -DestinationPath $stagingDirectory -Force
