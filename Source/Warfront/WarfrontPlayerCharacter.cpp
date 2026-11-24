@@ -4,7 +4,10 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
+#include "DrawDebugHelpers.h"
+#include "Engine/World.h"
 #include "InputCoreTypes.h"
+#include "Kismet/GameplayStatics.h"
 #include "WarfrontGameInstance.h"
 
 AWarfrontPlayerCharacter::AWarfrontPlayerCharacter()
@@ -40,6 +43,8 @@ void AWarfrontPlayerCharacter::SetupPlayerInputComponent(UInputComponent* Player
     PlayerInputComponent->BindAction(TEXT("Jump"), IE_Released, this, &ACharacter::StopJumping);
     PlayerInputComponent->BindAction(TEXT("Pause"), IE_Pressed, this, &AWarfrontPlayerCharacter::TogglePause);
     PlayerInputComponent->BindAction(TEXT("Inventory"), IE_Pressed, this, &AWarfrontPlayerCharacter::ToggleInventory);
+    PlayerInputComponent->BindAction(TEXT("Fire"), IE_Pressed, this, &AWarfrontPlayerCharacter::Fire);
+    PlayerInputComponent->BindAction(TEXT("Reload"), IE_Pressed, this, &AWarfrontPlayerCharacter::StartReload);
 }
 
 void AWarfrontPlayerCharacter::TogglePause()
@@ -81,5 +86,121 @@ void AWarfrontPlayerCharacter::MoveRight(float Value)
     {
         const FRotator YawRotation(0.0f, Controller->GetControlRotation().Yaw, 0.0f);
         AddMovementInput(FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y), Value);
+    }
+}
+
+void AWarfrontPlayerCharacter::Fire()
+{
+    UWorld* World = GetWorld();
+    if (!World || Health <= 0.0f)
+    {
+        return;
+    }
+
+    const float GameTime = World->GetTimeSeconds();
+    if (MagazineAmmo <= 0)
+    {
+        StartReload();
+        return;
+    }
+    if (GameTime - LastFireTime < 0.09f)
+    {
+        return;
+    }
+    LastFireTime = GameTime;
+    --MagazineAmmo;
+
+    const FVector Start = GetActorLocation() + FVector(0.0f, 0.0f, 62.0f);
+    const FVector Direction =
+        Controller ? Controller->GetControlRotation().Vector() : GetActorForwardVector();
+    const FVector End = Start + Direction * 50000.0f;
+
+    FHitResult Hit;
+    FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(FireTrace), false, this);
+    if (World->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, QueryParams))
+    {
+        DrawDebugLine(World, Start, Hit.Location, FColor::Orange, false, 0.06f, 0, 1.5f);
+        if (AActor* HitActor = Hit.GetActor())
+        {
+            UGameplayStatics::ApplyPointDamage(
+                HitActor,
+                34.0f,
+                Direction,
+                Hit,
+                Controller,
+                this,
+                UDamageType::StaticClass());
+        }
+    }
+    else
+    {
+        DrawDebugLine(World, Start, End, FColor::Orange, false, 0.06f, 0, 1.0f);
+    }
+
+    UpdateCombatHud();
+}
+
+void AWarfrontPlayerCharacter::StartReload()
+{
+    UWorld* World = GetWorld();
+    if (!World || Health <= 0.0f || MagazineAmmo >= 30 || ReserveAmmo <= 0)
+    {
+        return;
+    }
+    if (World->GetTimerManager().IsTimerActive(ReloadTimer))
+    {
+        return;
+    }
+
+    World->GetTimerManager().SetTimer(
+        ReloadTimer,
+        this,
+        &AWarfrontPlayerCharacter::FinishReload,
+        1.8f,
+        false);
+}
+
+void AWarfrontPlayerCharacter::FinishReload()
+{
+    const int32 Needed = 30 - MagazineAmmo;
+    const int32 Loaded = FMath::Min(Needed, ReserveAmmo);
+    MagazineAmmo += Loaded;
+    ReserveAmmo -= Loaded;
+    UpdateCombatHud();
+}
+
+float AWarfrontPlayerCharacter::TakeDamage(
+    float Damage,
+    FDamageEvent const& DamageEvent,
+    AController* EventInstigator,
+    AActor* DamageCauser)
+{
+    const float Applied = Super::TakeDamage(
+        Damage,
+        DamageEvent,
+        EventInstigator,
+        DamageCauser);
+    Health = FMath::Clamp(Health - Applied, 0.0f, 100.0f);
+
+    if (Health <= 0.0f)
+    {
+        DisableInput(Cast<APlayerController>(Controller));
+    }
+    UpdateCombatHud();
+    return Applied;
+}
+
+void AWarfrontPlayerCharacter::UpdateCombatHud()
+{
+    if (UWorld* World = GetWorld())
+    {
+        if (UWarfrontGameInstance* GameInstance =
+                Cast<UWarfrontGameInstance>(World->GetGameInstance()))
+        {
+            GameInstance->UpdateCombatStatus(
+                FMath::RoundToInt(Health),
+                MagazineAmmo,
+                ReserveAmmo);
+        }
     }
 }

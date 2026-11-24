@@ -183,15 +183,46 @@ void UWarfrontMainMenuWidget::ToggleInventory()
 void UWarfrontMainMenuWidget::ShowGameplayHud()
 {
     Content->ClearChildren();
+    CombatStatusText = SNew(STextBlock)
+        .Text(FText::FromString(TEXT("ZDRAVI 100  |  CZ 805 BREN  30 / 120")))
+        .Font(FCoreStyle::GetDefaultFontStyle(FName(TEXT("Bold")), 18))
+        .ColorAndOpacity(FSlateColor(FLinearColor(0.88f, 0.90f, 0.86f, 0.95f)));
+
     Content->AddSlot()
-        .AutoHeight()
+        .FillHeight(1.0f)
+        .HAlign(HAlign_Left)
+        .VAlign(VAlign_Bottom)
+        .Padding(28.0f, 0.0f, 0.0f, 24.0f)
+        [
+            CombatStatusText.ToSharedRef()
+        ];
+
+    Content->AddSlot()
+        .FillHeight(1.0f)
         .HAlign(HAlign_Center)
+        .VAlign(VAlign_Center)
         [
             SNew(STextBlock)
             .Text(FText::FromString(TEXT("+")))
             .Font(FCoreStyle::GetDefaultFontStyle(FName(TEXT("Bold")), 24))
             .ColorAndOpacity(FSlateColor(FLinearColor(0.88f, 0.90f, 0.86f, 0.9f)))
         ];
+}
+
+void UWarfrontMainMenuWidget::SetCombatStatus(
+    int32 Health,
+    int32 MagazineAmmo,
+    int32 ReserveAmmo)
+{
+    if (CombatStatusText.IsValid())
+    {
+        CombatStatusText->SetText(FText::FromString(
+            FString::Printf(
+                TEXT("ZDRAVI %d  |  CZ 805 BREN  %d / %d"),
+                Health,
+                MagazineAmmo,
+                ReserveAmmo)));
+    }
 }
 
 void UWarfrontMainMenuWidget::BuildPauseMenu()

@@ -24,6 +24,7 @@ public:
     void ToggleInventory();
     void ResumeGame();
     void ReturnToMainMenu();
+    void UpdateCombatStatus(int32 Health, int32 MagazineAmmo, int32 ReserveAmmo);
 
 private:
     void ShowMainMenu();

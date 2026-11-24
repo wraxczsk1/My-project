@@ -7,6 +7,7 @@
 #include "WarfrontMainMenuWidget.generated.h"
 
 class SVerticalBox;
+class STextBlock;
 class UTexture2D;
 
 UCLASS()
@@ -21,6 +22,7 @@ public:
     void TogglePauseMenu();
     void ToggleInventory();
     void ShowGameplayHud();
+    void SetCombatStatus(int32 Health, int32 MagazineAmmo, int32 ReserveAmmo);
     void BuildMainMenu();
 
 private:
@@ -38,6 +40,7 @@ private:
     FReply HandleBack();
 
     TSharedPtr<SVerticalBox> Content;
+    TSharedPtr<STextBlock> CombatStatusText;
     FSlateBrush LogoBrush;
     FString UpdateAvailableVersion;
 

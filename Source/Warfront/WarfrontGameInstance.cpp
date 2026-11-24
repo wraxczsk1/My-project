@@ -363,6 +363,17 @@ void UWarfrontGameInstance::ResumeGame()
     }
 }
 
+void UWarfrontGameInstance::UpdateCombatStatus(
+    int32 Health,
+    int32 MagazineAmmo,
+    int32 ReserveAmmo)
+{
+    if (MenuWidget.IsValid())
+    {
+        MenuWidget->SetCombatStatus(Health, MagazineAmmo, ReserveAmmo);
+    }
+}
+
 void UWarfrontGameInstance::ReturnToMainMenu()
 {
     if (MenuWidget.IsValid())
