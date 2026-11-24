@@ -189,6 +189,22 @@ def generate_ai_map(meshes, equipment=None):
         if equipment.get("cars"):
             actor = _spawn_mesh(equipment["cars"], "Truck_CzechInspired", collision=True)
             actor.set_actor_location(_vector((-900.0, 500.0, 10600.0)), False, False)
+        equipment_positions = (
+            ("czechweapons", "Czech_Rifle_CZ805", (400.0, 120.0, 10630.0)),
+            ("czechpistol", "Czech_Pistol_P10", (520.0, 120.0, 10630.0)),
+            ("czechhelmet", "Czech_Helmet", (640.0, 120.0, 10630.0)),
+            ("czechvest", "Czech_PlateCarrier", (760.0, 120.0, 10630.0)),
+            ("czechpatches", "Czech_Patches", (880.0, 120.0, 10630.0)),
+            ("czechapc", "Czech_APC", (1200.0, -600.0, 10600.0)),
+            ("czechcamotruck", "Czech_CamoTruck", (-1200.0, 500.0, 10600.0)),
+            ("czechhelicopter", "Czech_Helicopter", (1500.0, 800.0, 10900.0)),
+            ("czechdrone", "Czech_ReconDrone", (-1500.0, -800.0, 10850.0)),
+            ("czechaircraft", "Czech_Aircraft", (2200.0, 1800.0, 11200.0)),
+        )
+        for mesh_name, label, location in equipment_positions:
+            if equipment.get(mesh_name):
+                actor = _spawn_mesh(equipment[mesh_name], label, collision=True)
+                actor.set_actor_location(_vector(location), False, False)
     _build_sky()
     _ensure_player_start()
 

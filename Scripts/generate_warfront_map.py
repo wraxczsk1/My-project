@@ -667,6 +667,33 @@ def _make_props():
         _add_box(builder, "concrete", (x, ground + 4.0, z), (28.0, 8.0, 24.0))
         _add_box(builder, "metal", (x + 12.0, ground + 13.0, z), (2.0, 18.0, 2.0))
 
+        # Field tents and sandbag firing positions at each base.
+        for tent_index in range(4):
+            tx = x + (-22.0 + tent_index * 15.0)
+            tz = z + 42.0
+            tent_ground = _height(tx, tz)
+            _add_box(builder, "bark", (tx, tent_ground + 4.0, tz), (14.0, 8.0, 22.0), rng.random() * 0.25)
+            _add_ellipsoid(
+                builder,
+                "roof",
+                (tx, tent_ground + 9.0, tz),
+                (8.0, 5.0, 13.0),
+                sides=8,
+                rings=4,
+            )
+
+        for bunker_index in range(8):
+            bx = x + (-44.0 + bunker_index * 12.0)
+            bz = z - 48.0
+            bunker_ground = _height(bx, bz)
+            _add_box(
+                builder,
+                "concrete",
+                (bx, bunker_ground + 1.2, bz),
+                (7.0, 2.4, 5.0),
+                rng.random() * math.tau,
+            )
+
     # A shallow watercourse crosses the southern valley.
     water = builder.part("water")
     river_points = []

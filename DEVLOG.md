@@ -25,3 +25,9 @@
 - Added English menu, settings quality presets and grid inventory.
 - Removed duplicate split-screen viewport rendering.
 - Added lower-cost graphics defaults for a smoother Windows build.
+
+## 0.1.4
+
+- Added 13 mesh types for Czech weapons, gear, vehicles, aircraft and drones.
+- Expanded the 12 km battlefield with tents, sandbags and bunker positions.
+- Rebuilt and imported all 3D map and equipment GLB assets into Unreal.

@@ -51,6 +51,15 @@ REQUIRED_EQUIPMENT_MESHES = (
     "czechweapons",
     "tanks",
     "cars",
+    "czechpistol",
+    "czechhelmet",
+    "czechvest",
+    "czechpatches",
+    "czechapc",
+    "czechcamotruck",
+    "czechhelicopter",
+    "czechdrone",
+    "czechaircraft",
 )
 
 
