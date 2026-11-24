@@ -5,6 +5,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "InputCoreTypes.h"
+#include "WarfrontGameInstance.h"
 
 AWarfrontPlayerCharacter::AWarfrontPlayerCharacter()
 {
@@ -37,6 +38,32 @@ void AWarfrontPlayerCharacter::SetupPlayerInputComponent(UInputComponent* Player
     PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &APawn::AddControllerPitchInput);
     PlayerInputComponent->BindAction(TEXT("Jump"), IE_Pressed, this, &ACharacter::Jump);
     PlayerInputComponent->BindAction(TEXT("Jump"), IE_Released, this, &ACharacter::StopJumping);
+    PlayerInputComponent->BindAction(TEXT("Pause"), IE_Pressed, this, &AWarfrontPlayerCharacter::TogglePause);
+    PlayerInputComponent->BindAction(TEXT("Inventory"), IE_Pressed, this, &AWarfrontPlayerCharacter::ToggleInventory);
+}
+
+void AWarfrontPlayerCharacter::TogglePause()
+{
+    if (UWorld* World = GetWorld())
+    {
+        if (UWarfrontGameInstance* GameInstance =
+                Cast<UWarfrontGameInstance>(World->GetGameInstance()))
+        {
+            GameInstance->TogglePauseMenu();
+        }
+    }
+}
+
+void AWarfrontPlayerCharacter::ToggleInventory()
+{
+    if (UWorld* World = GetWorld())
+    {
+        if (UWarfrontGameInstance* GameInstance =
+                Cast<UWarfrontGameInstance>(World->GetGameInstance()))
+        {
+            GameInstance->ToggleInventory();
+        }
+    }
 }
 
 void AWarfrontPlayerCharacter::MoveForward(float Value)

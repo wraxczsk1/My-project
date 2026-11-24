@@ -316,8 +316,7 @@ void UWarfrontGameInstance::FinishLoading()
 {
     if (MenuWidget.IsValid())
     {
-        MenuWidget->RemoveFromParent();
-        MenuWidget.Reset();
+        MenuWidget->ShowGameplayHud();
     }
 
     if (APlayerController* PlayerController = GetFirstLocalPlayerController())
@@ -326,6 +325,58 @@ void UWarfrontGameInstance::FinishLoading()
         PlayerController->SetIgnoreLookInput(false);
         PlayerController->SetShowMouseCursor(false);
         PlayerController->SetInputMode(FInputModeGameOnly());
+    }
+}
+
+void UWarfrontGameInstance::TogglePauseMenu()
+{
+    if (!MenuWidget.IsValid())
+    {
+        ShowMainMenu();
+    }
+    if (MenuWidget.IsValid())
+    {
+        MenuWidget->TogglePauseMenu();
+    }
+}
+
+void UWarfrontGameInstance::ToggleInventory()
+{
+    if (MenuWidget.IsValid())
+    {
+        MenuWidget->ToggleInventory();
+    }
+}
+
+void UWarfrontGameInstance::ResumeGame()
+{
+    if (MenuWidget.IsValid())
+    {
+        MenuWidget->ShowGameplayHud();
+    }
+    if (APlayerController* PlayerController = GetFirstLocalPlayerController())
+    {
+        PlayerController->SetIgnoreMoveInput(false);
+        PlayerController->SetIgnoreLookInput(false);
+        PlayerController->SetShowMouseCursor(false);
+        PlayerController->SetInputMode(FInputModeGameOnly());
+    }
+}
+
+void UWarfrontGameInstance::ReturnToMainMenu()
+{
+    if (MenuWidget.IsValid())
+    {
+        MenuWidget->BuildMainMenu();
+    }
+    if (APlayerController* PlayerController = GetFirstLocalPlayerController())
+    {
+        PlayerController->SetShowMouseCursor(true);
+        PlayerController->SetIgnoreMoveInput(true);
+        PlayerController->SetIgnoreLookInput(true);
+        FInputModeUIOnly InputMode;
+        InputMode.SetWidgetToFocus(MenuWidget->TakeWidget());
+        PlayerController->SetInputMode(InputMode);
     }
 }
 

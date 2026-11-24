@@ -20,6 +20,10 @@ public:
     void BeginSinglePlayer();
     void QuitGame();
     void OpenReleasesPage();
+    void TogglePauseMenu();
+    void ToggleInventory();
+    void ResumeGame();
+    void ReturnToMainMenu();
 
 private:
     void ShowMainMenu();

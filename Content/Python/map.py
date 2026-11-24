@@ -146,7 +146,7 @@ def _ensure_player_start():
     start.set_actor_label(MAP_PREFIX + "PlayerStart")
 
 
-def generate_ai_map(meshes):
+def generate_ai_map(meshes, equipment=None):
     """Replace the old splat-only level with terrain and separate 3D map layers."""
     global _ACTORS
 
@@ -171,6 +171,25 @@ def generate_ai_map(meshes):
     _spawn_mesh(meshes["vegetation"], "Forests_And_Trees", collision=False)
     _spawn_mesh(meshes["buildings"], "Cities_And_Ruins", collision=True)
     _spawn_mesh(meshes["battlefieldprops"], "WarProps_And_Wrecks", collision=True)
+    if isinstance(equipment, dict):
+        if equipment.get("soldiers"):
+            for index in range(12):
+                actor = _spawn_mesh(
+                    equipment["soldiers"],
+                    "Soldier_" + str(index),
+                    collision=True,
+                )
+                actor.set_actor_location(
+                    _vector((-180.0 + index * 48.0, 30.0 * (1 if index % 2 else -1), 10600.0)),
+                    False,
+                    False,
+                )
+        if equipment.get("tanks"):
+            actor = _spawn_mesh(equipment["tanks"], "Tank_CzechInspired", collision=True)
+            actor.set_actor_location(_vector((900.0, -600.0, 10600.0)), False, False)
+        if equipment.get("cars"):
+            actor = _spawn_mesh(equipment["cars"], "Truck_CzechInspired", collision=True)
+            actor.set_actor_location(_vector((-900.0, 500.0, 10600.0)), False, False)
     _build_sky()
     _ensure_player_start()
 

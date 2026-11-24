@@ -18,11 +18,16 @@ public:
     virtual TSharedRef<SWidget> RebuildWidget() override;
     void ShowLoadingScreen();
     void SetUpdateAvailableVersion(const FString& Version);
+    void TogglePauseMenu();
+    void ToggleInventory();
+    void ShowGameplayHud();
+    void BuildMainMenu();
 
 private:
-    void BuildMainMenu();
     void BuildMultiplayerScreen();
     void BuildDevLogScreen();
+    void BuildPauseMenu();
+    void BuildInventoryScreen();
     TSharedRef<SWidget> MakeMenuButton(const FText& Label, const FOnClicked& OnClicked) const;
 
     FReply HandleSinglePlayer();

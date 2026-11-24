@@ -18,6 +18,13 @@ BATTLEFIELD_FILE = os.path.join(
     "WarfrontAIMap.glb",
 )
 BATTLEFIELD_ASSET_PATH = "/Game/Warfront/Maps/Generated"
+EQUIPMENT_FILE = os.path.join(
+    unreal.Paths.project_content_dir(),
+    "Warfront",
+    "Models",
+    "WarfrontEquipment.glb",
+)
+EQUIPMENT_ASSET_PATH = "/Game/Warfront/Models/Generated"
 LOGO_SOURCE = os.path.join(
     unreal.Paths.project_content_dir(),
     "Warfront",
@@ -30,6 +37,7 @@ PROJECT_DIR = os.path.dirname(os.path.normpath(unreal.Paths.project_content_dir(
 STATE_DIR = os.path.join(PROJECT_DIR, "Saved")
 STATE_FILE = os.path.join(STATE_DIR, "WarfrontMapGenerator.txt")
 ASSET_STATE_FILE = os.path.join(STATE_DIR, "WarfrontAIMapAssets.json")
+EQUIPMENT_STATE_FILE = os.path.join(STATE_DIR, "WarfrontEquipmentAssets.json")
 MAP_SCRIPT = os.path.join(os.path.dirname(__file__), "map.py")
 REQUIRED_MESHES = (
     "terrain",
@@ -37,6 +45,12 @@ REQUIRED_MESHES = (
     "vegetation",
     "buildings",
     "battlefieldprops",
+)
+REQUIRED_EQUIPMENT_MESHES = (
+    "soldiers",
+    "czechweapons",
+    "tanks",
+    "cars",
 )
 
 
@@ -57,6 +71,58 @@ def _import_logo_if_needed():
 
     if not unreal.EditorAssetLibrary.load_asset(LOGO_ASSET_PATH):
         raise RuntimeError("Nepodarilo se importovat logo Warfront: " + LOGO_SOURCE)
+
+
+def _load_or_import_equipment():
+    if not os.path.isfile(EQUIPMENT_FILE):
+        unreal.log_warning("Warfront 3D vybaveni nebylo nalezeno: " + EQUIPMENT_FILE)
+        return {}
+
+    source_mtime = os.path.getmtime(EQUIPMENT_FILE)
+    if os.path.isfile(EQUIPMENT_STATE_FILE):
+        with open(EQUIPMENT_STATE_FILE, "r", encoding="utf-8") as state_file:
+            state = json.load(state_file)
+        if state.get("source_mtime") == source_mtime:
+            meshes = {
+                name: unreal.EditorAssetLibrary.load_asset(path)
+                for name, path in state.get("assets", {}).items()
+            }
+            if all(isinstance(mesh, unreal.StaticMesh) for mesh in meshes.values()):
+                return meshes
+
+    import_task = unreal.AssetImportTask()
+    import_task.set_editor_property("filename", EQUIPMENT_FILE)
+    import_task.set_editor_property("destination_path", EQUIPMENT_ASSET_PATH)
+    import_task.set_editor_property("destination_name", "WarfrontEquipment")
+    import_task.set_editor_property("replace_existing", True)
+    import_task.set_editor_property("automated", True)
+    import_task.set_editor_property("save", True)
+    unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([import_task])
+
+    meshes = {}
+    for asset_path in import_task.get_editor_property("imported_object_paths"):
+        asset = unreal.EditorAssetLibrary.load_asset(asset_path)
+        if not isinstance(asset, unreal.StaticMesh):
+            continue
+        name = asset.get_name().lower()
+        for category in REQUIRED_EQUIPMENT_MESHES:
+            if category in name:
+                meshes[category] = asset
+
+    os.makedirs(STATE_DIR, exist_ok=True)
+    with open(EQUIPMENT_STATE_FILE, "w", encoding="utf-8") as state_file:
+        json.dump(
+            {
+                "source_mtime": source_mtime,
+                "assets": {
+                    name: mesh.get_path_name()
+                    for name, mesh in meshes.items()
+                },
+            },
+            state_file,
+            indent=2,
+        )
+    return meshes
 
 
 def _level_editor():
@@ -191,11 +257,12 @@ def _load_or_import_battlefield_meshes():
 
 def generate_and_save_startup_map():
     _import_logo_if_needed()
+    equipment = _load_or_import_equipment()
     regenerate = _map_script_needs_to_run()
     _open_or_create_map()
     if regenerate:
         meshes = _load_or_import_battlefield_meshes()
-        _load_map_generator().generate_ai_map(meshes)
+        _load_map_generator().generate_ai_map(meshes, equipment)
         if not _level_editor().save_current_level():
             raise RuntimeError("Nepodarilo se ulozit level: " + MAP_PACKAGE)
         os.makedirs(STATE_DIR, exist_ok=True)

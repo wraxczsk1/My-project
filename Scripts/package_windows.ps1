@@ -48,6 +48,20 @@ if (-not $gameExecutable) {
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'WarfrontUpdater.ps1') `
     -Destination (Join-Path $gameExecutable.DirectoryName 'WarfrontUpdater.ps1') -Force
 
+$playFolder = Join-Path $buildRoot 'Warfront-Game'
+New-Item -ItemType Directory -Path $playFolder -Force | Out-Null
+if (Test-Path -LiteralPath $playFolder) {
+    Get-ChildItem -LiteralPath $playFolder -Force | Remove-Item -Recurse -Force
+}
+New-Item -ItemType Directory -Path $playFolder -Force | Out-Null
+Copy-Item -LiteralPath (Join-Path $archiveRoot 'Windows') -Destination $playFolder -Recurse -Force
+
+$playExecutable = Get-ChildItem -LiteralPath $playFolder -Filter 'Warfront.exe' -File -Recurse |
+    Select-Object -First 1
+if (-not $playExecutable) {
+    throw "The playable Warfront folder is missing Warfront.exe."
+}
+
 $archivePath = Join-Path $buildRoot 'Warfront-Windows.zip'
 if (Test-Path -LiteralPath $archivePath) {
     Remove-Item -LiteralPath $archivePath -Force
@@ -56,5 +70,6 @@ Compress-Archive -Path (Join-Path $gameExecutable.DirectoryName '*') `
     -DestinationPath $archivePath -CompressionLevel Optimal
 
 Write-Output "Game executable: $($gameExecutable.FullName)"
+Write-Output "Play folder: $($playExecutable.DirectoryName)"
 Write-Output "Release package: $archivePath"
 Write-Output "Version: $version"

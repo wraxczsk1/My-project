@@ -10,6 +10,7 @@
 #include "Widgets/SOverlay.h"
 #include "Widgets/SBoxPanel.h"
 #include "Widgets/Images/SImage.h"
+#include "Widgets/SBoxPanel.h"
 #include "Widgets/Text/STextBlock.h"
 
 TSharedRef<SWidget> UWarfrontMainMenuWidget::RebuildWidget()
@@ -33,7 +34,7 @@ TSharedRef<SWidget> UWarfrontMainMenuWidget::RebuildWidget()
         [
             SNew(SBorder)
             .BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
-            .BorderBackgroundColor(FLinearColor(0.0f, 0.0f, 0.0f, 0.72f))
+            .BorderBackgroundColor(FLinearColor(0.018f, 0.026f, 0.032f, 0.94f))
         ]
         + SOverlay::Slot()
         .HAlign(HAlign_Center)
@@ -41,11 +42,11 @@ TSharedRef<SWidget> UWarfrontMainMenuWidget::RebuildWidget()
         [
             SNew(SBorder)
             .BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
-            .BorderBackgroundColor(FLinearColor(0.035f, 0.045f, 0.05f, 0.96f))
-            .Padding(FMargin(42.0f))
+            .BorderBackgroundColor(FLinearColor(0.052f, 0.074f, 0.082f, 0.98f))
+            .Padding(FMargin(38.0f))
             [
                 SNew(SBox)
-                .WidthOverride(560.0f)
+                .WidthOverride(620.0f)
                 [
                     Content.ToSharedRef()
                 ]
@@ -62,7 +63,7 @@ void UWarfrontMainMenuWidget::BuildMainMenu()
         Content->AddSlot()
             .AutoHeight()
             .HAlign(HAlign_Center)
-            .Padding(0.0f, 0.0f, 0.0f, 22.0f)
+            .Padding(0.0f, 0.0f, 0.0f, 14.0f)
             [
                 SNew(SImage)
                 .Image(&LogoBrush)
@@ -84,12 +85,12 @@ void UWarfrontMainMenuWidget::BuildMainMenu()
     Content->AddSlot()
         .AutoHeight()
         .HAlign(HAlign_Center)
-        .Padding(0.0f, 0.0f, 0.0f, 28.0f)
+        .Padding(0.0f, 0.0f, 0.0f, 22.0f)
         [
             SNew(STextBlock)
-            .Text(FText::FromString(TEXT("VYBER REZIMU")))
+        .Text(FText::FromString(TEXT("HRA SE SLOVNIM BOJISTEM")))
             .Font(FCoreStyle::GetDefaultFontStyle(FName(TEXT("Regular")), 16))
-            .ColorAndOpacity(FSlateColor(FLinearColor(0.62f, 0.68f, 0.66f)))
+        .ColorAndOpacity(FSlateColor(FLinearColor(0.64f, 0.72f, 0.70f)))
             .Justification(ETextJustify::Center)
         ];
 
@@ -138,6 +139,167 @@ void UWarfrontMainMenuWidget::BuildMainMenu()
             MakeMenuButton(
                 FText::FromString(TEXT("KONEC HRY")),
                 FOnClicked::CreateUObject(this, &UWarfrontMainMenuWidget::HandleExit))
+        ];
+}
+
+void UWarfrontMainMenuWidget::TogglePauseMenu()
+{
+    BuildPauseMenu();
+    if (UWorld* World = GetWorld())
+    {
+        if (APlayerController* PlayerController =
+                World->GetFirstPlayerController())
+        {
+            PlayerController->SetShowMouseCursor(true);
+            PlayerController->SetIgnoreMoveInput(true);
+            PlayerController->SetIgnoreLookInput(true);
+
+            FInputModeUIOnly InputMode;
+            InputMode.SetWidgetToFocus(TakeWidget());
+            InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+            PlayerController->SetInputMode(InputMode);
+        }
+    }
+}
+
+void UWarfrontMainMenuWidget::ToggleInventory()
+{
+    BuildInventoryScreen();
+    if (UWorld* World = GetWorld())
+    {
+        if (APlayerController* PlayerController =
+                World->GetFirstPlayerController())
+        {
+            PlayerController->SetShowMouseCursor(true);
+            PlayerController->SetIgnoreMoveInput(true);
+            PlayerController->SetIgnoreLookInput(true);
+            FInputModeUIOnly InputMode;
+            InputMode.SetWidgetToFocus(TakeWidget());
+            PlayerController->SetInputMode(InputMode);
+        }
+    }
+}
+
+void UWarfrontMainMenuWidget::ShowGameplayHud()
+{
+    Content->ClearChildren();
+    Content->AddSlot()
+        .AutoHeight()
+        .HAlign(HAlign_Center)
+        [
+            SNew(STextBlock)
+            .Text(FText::FromString(TEXT("+")))
+            .Font(FCoreStyle::GetDefaultFontStyle(FName(TEXT("Bold")), 24))
+            .ColorAndOpacity(FSlateColor(FLinearColor(0.88f, 0.90f, 0.86f, 0.9f)))
+        ];
+}
+
+void UWarfrontMainMenuWidget::BuildPauseMenu()
+{
+    Content->ClearChildren();
+    Content->AddSlot()
+        .AutoHeight()
+        .HAlign(HAlign_Center)
+        .Padding(0.0f, 0.0f, 0.0f, 18.0f)
+        [
+            SNew(STextBlock)
+            .Text(FText::FromString(TEXT("PAUSE")))
+            .Font(FCoreStyle::GetDefaultFontStyle(FName(TEXT("Bold")), 38))
+            .ColorAndOpacity(FSlateColor(FLinearColor(0.88f, 0.83f, 0.69f)))
+        ];
+
+    Content->AddSlot().AutoHeight().Padding(0.0f, 5.0f)
+        [
+            MakeMenuButton(
+                FText::FromString(TEXT("ZPET DO HRY")),
+                FOnClicked::CreateLambda([this]()
+                {
+                    if (UWorld* World = GetWorld())
+                    {
+                        if (UWarfrontGameInstance* GameInstance =
+                                Cast<UWarfrontGameInstance>(World->GetGameInstance()))
+                        {
+                            GameInstance->ResumeGame();
+                        }
+                    }
+                    return FReply::Handled();
+                }))
+        ];
+
+    Content->AddSlot().AutoHeight().Padding(0.0f, 5.0f)
+        [
+            MakeMenuButton(
+                FText::FromString(TEXT("INVENTAR")),
+                FOnClicked::CreateLambda([this]()
+                {
+                    BuildInventoryScreen();
+                    return FReply::Handled();
+                }))
+        ];
+
+    Content->AddSlot().AutoHeight().Padding(0.0f, 5.0f)
+        [
+            MakeMenuButton(
+                FText::FromString(TEXT("ZPET DO HLAVNIHO MENU")),
+                FOnClicked::CreateLambda([this]()
+                {
+                    if (UWorld* World = GetWorld())
+                    {
+                        if (UWarfrontGameInstance* GameInstance =
+                                Cast<UWarfrontGameInstance>(World->GetGameInstance()))
+                        {
+                            GameInstance->ReturnToMainMenu();
+                        }
+                    }
+                    return FReply::Handled();
+                }))
+        ];
+}
+
+void UWarfrontMainMenuWidget::BuildInventoryScreen()
+{
+    Content->ClearChildren();
+    Content->AddSlot()
+        .AutoHeight()
+        .HAlign(HAlign_Center)
+        .Padding(0.0f, 0.0f, 0.0f, 16.0f)
+        [
+            SNew(STextBlock)
+            .Text(FText::FromString(TEXT("INVENTAR")))
+            .Font(FCoreStyle::GetDefaultFontStyle(FName(TEXT("Bold")), 38))
+            .ColorAndOpacity(FSlateColor(FLinearColor(0.88f, 0.83f, 0.69f)))
+        ];
+
+    Content->AddSlot()
+        .AutoHeight()
+        .Padding(0.0f, 4.0f)
+        [
+            SNew(STextBlock)
+            .Text(FText::FromString(
+                TEXT("PRIMARNI: CZ 805 BREN\nSEKUNDARNI: CZ P-10 C\n")
+                TEXT("HELM: MICH / flecktarn\nVESTA: PLATE CARRIER\n")
+                TEXT("VYBAVA: bandáže, granát, optika")))
+            .Font(FCoreStyle::GetDefaultFontStyle(FName(TEXT("Regular")), 16))
+            .ColorAndOpacity(FSlateColor(FLinearColor(0.78f, 0.82f, 0.79f)))
+            .AutoWrapText(true)
+        ];
+
+    Content->AddSlot().AutoHeight().Padding(0.0f, 12.0f)
+        [
+            MakeMenuButton(
+                FText::FromString(TEXT("ZAVRIT INVENTAR")),
+                FOnClicked::CreateLambda([this]()
+                {
+                    if (UWorld* World = GetWorld())
+                    {
+                        if (UWarfrontGameInstance* GameInstance =
+                                Cast<UWarfrontGameInstance>(World->GetGameInstance()))
+                        {
+                            GameInstance->ResumeGame();
+                        }
+                    }
+                    return FReply::Handled();
+                }))
         ];
 }
 
@@ -223,15 +385,32 @@ TSharedRef<SWidget> UWarfrontMainMenuWidget::MakeMenuButton(
     const FOnClicked& OnClicked) const
 {
     return SNew(SButton)
-        .ContentPadding(FMargin(16.0f, 13.0f))
-        .ButtonColorAndOpacity(FSlateColor(FLinearColor(0.18f, 0.23f, 0.22f, 1.0f)))
+        .ContentPadding(FMargin(18.0f, 15.0f))
+        .ButtonColorAndOpacity(FSlateColor(FLinearColor(0.105f, 0.145f, 0.155f, 1.0f)))
         .OnClicked(OnClicked)
         [
-            SNew(STextBlock)
-            .Text(Label)
-            .Font(FCoreStyle::GetDefaultFontStyle(FName(TEXT("Bold")), 18))
-            .ColorAndOpacity(FSlateColor(FLinearColor(0.91f, 0.91f, 0.86f)))
-            .Justification(ETextJustify::Center)
+            SNew(SHorizontalBox)
+            + SHorizontalBox::Slot()
+            .FillWidth(1.0f)
+            .HAlign(HAlign_Left)
+            .VAlign(VAlign_Center)
+            [
+                SNew(STextBlock)
+                .Text(Label)
+                .Font(FCoreStyle::GetDefaultFontStyle(FName(TEXT("Bold")), 18))
+                .ColorAndOpacity(FSlateColor(FLinearColor(0.92f, 0.92f, 0.86f)))
+                .Justification(ETextJustify::Left)
+            ]
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            .HAlign(HAlign_Right)
+            .VAlign(VAlign_Center)
+            [
+                SNew(STextBlock)
+                .Text(FText::FromString(TEXT("›")))
+                .Font(FCoreStyle::GetDefaultFontStyle(FName(TEXT("Bold")), 26))
+                .ColorAndOpacity(FSlateColor(FLinearColor(0.66f, 0.74f, 0.61f)))
+            ]
         ];
 }
 
@@ -241,11 +420,23 @@ void UWarfrontMainMenuWidget::ShowLoadingScreen()
     Content->AddSlot()
         .AutoHeight()
         .HAlign(HAlign_Center)
+        .Padding(0.0f, 0.0f, 0.0f, 12.0f)
         [
             SNew(STextBlock)
             .Text(FText::FromString(TEXT("NACITANI BOJISTE...")))
             .Font(FCoreStyle::GetDefaultFontStyle(FName(TEXT("Bold")), 28))
             .ColorAndOpacity(FSlateColor(FLinearColor(0.88f, 0.83f, 0.69f)))
+            .Justification(ETextJustify::Center)
+        ];
+
+    Content->AddSlot()
+        .AutoHeight()
+        .HAlign(HAlign_Center)
+        [
+            SNew(STextBlock)
+            .Text(FText::FromString(TEXT("Teren • Atmosfera • Jednotky • Vozidla")))
+            .Font(FCoreStyle::GetDefaultFontStyle(FName(TEXT("Regular")), 14))
+            .ColorAndOpacity(FSlateColor(FLinearColor(0.64f, 0.72f, 0.70f)))
             .Justification(ETextJustify::Center)
         ];
 }
