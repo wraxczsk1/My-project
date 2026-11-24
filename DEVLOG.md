@@ -16,3 +16,12 @@
 - Added a dedicated `Warfront-Game` launcher folder.
 - Redesigned the main menu and loading screen.
 - Verified a DirectX launch path for the packaging build.
+
+## 0.1.3
+
+- Rebuilt and saved the 12 km battlefield `.umap` from actual 3D mesh layers.
+- Repaired the Unreal Python map generation collision setup.
+- Moved the PlayerStart above the generated terrain.
+- Added English menu, settings quality presets and grid inventory.
+- Removed duplicate split-screen viewport rendering.
+- Added lower-cost graphics defaults for a smoother Windows build.
