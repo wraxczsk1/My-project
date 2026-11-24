@@ -1,0 +1,475 @@
+{
+    "FileVersion": 3,
+    "EngineAssociation": "5.8",
+    "Category": "",
+    "Description": "",
+    "Plugins": [
+        {
+            "Name": "ModelingToolsEditorMode",
+            "Enabled": true,
+            "TargetAllowList": [
+                "Editor"
+            ]
+        },
+        {
+            "Name": "Landmass",
+            "Enabled": true
+        },
+        {
+            "Name": "InEditorDocumentation",
+            "Enabled": true,
+            "TargetAllowList": [
+                "Editor"
+            ],
+            "PlatformAllowList": [
+                "Win64",
+                "Mac",
+                "Linux"
+            ]
+        },
+        {
+            "Name": "AIAssistant",
+            "Enabled": true
+        },
+        {
+            "Name": "WaterAdvanced",
+            "Enabled": true
+        },
+        {
+            "Name": "WaterExtras",
+            "Enabled": true
+        },
+        {
+            "Name": "PixelCapture",
+            "Enabled": true
+        },
+        {
+            "Name": "PythonFoundationPackages",
+            "Enabled": false
+        },
+        {
+            "Name": "Text3D",
+            "Enabled": true
+        },
+        {
+            "Name": "CommonUI",
+            "Enabled": true
+        },
+        {
+            "Name": "UIFramework",
+            "Enabled": true
+        },
+        {
+            "Name": "WebBrowserNativeProxy",
+            "Enabled": true
+        },
+        {
+            "Name": "SlateModelViewViewModel",
+            "Enabled": true
+        },
+        {
+            "Name": "Nwiro",
+            "Enabled": true,
+            "MarketplaceURL": "com.epicgames.launcher://ue/Fab/product/22e3bc90-ed91-4154-8bea-21c33e6a51b7"
+        },
+        {
+            "Name": "AIModuleToolset",
+            "Enabled": true
+        },
+        {
+            "Name": "MassAI",
+            "Enabled": true
+        },
+        {
+            "Name": "LearningCore",
+            "Enabled": true
+        },
+        {
+            "Name": "LearningAgents",
+            "Enabled": true
+        },
+        {
+            "Name": "HTNPlanner",
+            "Enabled": true
+        },
+        {
+            "Name": "ZoneGraphAnnotations",
+            "Enabled": true
+        },
+        {
+            "Name": "FileLogging",
+            "Enabled": true
+        },
+        {
+            "Name": "GooglePAD",
+            "Enabled": false
+        },
+        {
+            "Name": "AndroidFileServer",
+            "Enabled": false
+        },
+        {
+            "Name": "OnlineSubsystemGooglePlay",
+            "Enabled": false,
+            "SupportedTargetPlatforms": [
+                "Android"
+            ]
+        },
+        {
+            "Name": "AndroidPermission",
+            "Enabled": false
+        },
+        {
+            "Name": "AnimationBudgetAllocator",
+            "Enabled": true
+        },
+        {
+            "Name": "CurveExpression",
+            "Enabled": true
+        },
+        {
+            "Name": "AnimationLayering",
+            "Enabled": true
+        },
+        {
+            "Name": "AnimationLocomotionLibrary",
+            "Enabled": true
+        },
+        {
+            "Name": "AnimationWarping",
+            "Enabled": true
+        },
+        {
+            "Name": "AnimDatabase",
+            "Enabled": true
+        },
+        {
+            "Name": "AnimGen",
+            "Enabled": true
+        },
+        {
+            "Name": "AnimToTexture",
+            "Enabled": true
+        },
+        {
+            "Name": "BlendStack",
+            "Enabled": true
+        },
+        {
+            "Name": "ChaosClothGenerator",
+            "Enabled": true
+        },
+        {
+            "Name": "ChaosFleshGenerator",
+            "Enabled": true
+        },
+        {
+            "Name": "Chooser",
+            "Enabled": true
+        },
+        {
+            "Name": "CinematicSequenceNavigator",
+            "Enabled": false,
+            "SupportedTargetPlatforms": [
+                "Win64",
+                "Linux",
+                "Mac"
+            ]
+        },
+        {
+            "Name": "ContextualAnimation",
+            "Enabled": true
+        },
+        {
+            "Name": "ControlRigDynamics",
+            "Enabled": true
+        },
+        {
+            "Name": "DirectMeshControl",
+            "Enabled": true
+        },
+        {
+            "Name": "DNACalib",
+            "Enabled": true
+        },
+        {
+            "Name": "EvaluationNotifies",
+            "Enabled": true
+        },
+        {
+            "Name": "GeneSplicer",
+            "Enabled": true
+        },
+        {
+            "Name": "HierarchyTable",
+            "Enabled": true
+        },
+        {
+            "Name": "HierarchyTableAnimation",
+            "Enabled": true
+        },
+        {
+            "Name": "LiveLinkControlRig",
+            "Enabled": true
+        },
+        {
+            "Name": "LiveLinkCurveDebugUI",
+            "Enabled": true
+        },
+        {
+            "Name": "LiveLinkHub",
+            "Enabled": true
+        },
+        {
+            "Name": "LiveLink",
+            "Enabled": true
+        },
+        {
+            "Name": "LiveLinkExampleDevice",
+            "Enabled": true
+        },
+        {
+            "Name": "LiveLinkUnrealDevice",
+            "Enabled": true
+        },
+        {
+            "Name": "Locomotor",
+            "Enabled": true
+        },
+        {
+            "Name": "DetailPoseModel",
+            "Enabled": true
+        },
+        {
+            "Name": "MLDeformerFramework",
+            "Enabled": true
+        },
+        {
+            "Name": "NearestNeighborModel",
+            "Enabled": true
+        },
+        {
+            "Name": "NeuralMorphModel",
+            "Enabled": true
+        },
+        {
+            "Name": "VertexDeltaModel",
+            "Enabled": true,
+            "SupportedTargetPlatforms": [
+                "Win64",
+                "Linux",
+                "Mac"
+            ]
+        },
+        {
+            "Name": "AvalancheSequenceNavigator",
+            "Enabled": false,
+            "SupportedTargetPlatforms": [
+                "Win64",
+                "Linux",
+                "Mac"
+            ]
+        },
+        {
+            "Name": "MotionTrajectory",
+            "Enabled": true
+        },
+        {
+            "Name": "MotionWarping",
+            "Enabled": true
+        },
+        {
+            "Name": "MovieScenePoseSearchTracks",
+            "Enabled": true
+        },
+        {
+            "Name": "PerformanceCaptureCore",
+            "Enabled": true
+        },
+        {
+            "Name": "PerformanceCaptureWorkflow",
+            "Enabled": true
+        },
+        {
+            "Name": "PoseSearch",
+            "Enabled": true
+        },
+        {
+            "Name": "SkeletalMeshMorphTargetEditingTools",
+            "Enabled": true
+        },
+        {
+            "Name": "TrajectoryTools",
+            "Enabled": true
+        },
+        {
+            "Name": "UAFChooser",
+            "Enabled": true
+        },
+        {
+            "Name": "UAFAnimNode",
+            "Enabled": true
+        },
+        {
+            "Name": "UAFControlRig",
+            "Enabled": true
+        },
+        {
+            "Name": "UAFLayering",
+            "Enabled": true
+        },
+        {
+            "Name": "UAFMass",
+            "Enabled": true
+        },
+        {
+            "Name": "UAFPoseSearch",
+            "Enabled": true
+        },
+        {
+            "Name": "UAFStateTree",
+            "Enabled": true
+        },
+        {
+            "Name": "UAF",
+            "Enabled": true
+        },
+        {
+            "Name": "ChaosClothAssetToolset",
+            "Enabled": true
+        },
+        {
+            "Name": "NVCodecs",
+            "Enabled": true,
+            "SupportedTargetPlatforms": [
+                "Win64",
+                "Linux"
+            ]
+        },
+        {
+            "Name": "VTCodecs",
+            "Enabled": true,
+            "SupportedTargetPlatforms": [
+                "Mac",
+                "IOS"
+            ]
+        },
+        {
+            "Name": "WMFCodecs",
+            "Enabled": true,
+            "SupportedTargetPlatforms": [
+                "Win64"
+            ]
+        },
+        {
+            "Name": "LibVpxCodecs",
+            "Enabled": true,
+            "SupportedTargetPlatforms": [
+                "Win64",
+                "Linux",
+                "Mac",
+                "Android",
+                "IOS"
+            ]
+        },
+        {
+            "Name": "AVCodecsCore",
+            "Enabled": true,
+            "SupportedTargetPlatforms": [
+                "Win64",
+                "Linux",
+                "Mac",
+                "Android",
+                "IOS"
+            ]
+        },
+        {
+            "Name": "AMFCodecs",
+            "Enabled": true,
+            "SupportedTargetPlatforms": [
+                "Win64"
+            ]
+        },
+        {
+            "Name": "OpenCV",
+            "Enabled": true
+        },
+        {
+            "Name": "ContentBrowserAliasDataSource",
+            "Enabled": true
+        },
+        {
+            "Name": "DataprepEditor",
+            "Enabled": true
+        },
+        {
+            "Name": "DataprepGeometryOperations",
+            "Enabled": true
+        },
+        {
+            "Name": "SequenceNavigator",
+            "Enabled": false
+        },
+        {
+            "Name": "Avalanche",
+            "Enabled": false
+        },
+        {
+            "Name": "AvalancheCore",
+            "Enabled": false
+        },
+        {
+            "Name": "AvalancheEditor",
+            "Enabled": false
+        },
+        {
+            "Name": "AvalancheSequence",
+            "Enabled": false
+        },
+        {
+            "Name": "MotionDesign",
+            "Enabled": false
+        },
+        {
+            "Name": "MotionDesignEditor",
+            "Enabled": false
+        },
+        {
+            "Name": "BitpartAI",
+            "Enabled": true,
+            "SupportedTargetPlatforms": [
+                "Win64",
+                "Mac",
+                "Linux"
+            ]
+        },
+        {
+            "Name": "TreeGeneratorImporter",
+            "Enabled": true
+        },
+        {
+            "Name": "IconCreator",
+            "Enabled": true,
+            "MarketplaceURL": "com.epicgames.launcher://ue/Fab/product/1509c8dc-fed5-452b-abdb-b96a6bba4a7a"
+        },
+        {
+            "Name": "GenerativeAISupport",
+            "Enabled": false
+        },
+        {
+            "Name": "PythonScriptPlugin",
+            "Enabled": true
+        },
+        {
+            "Name": "EditorScriptingUtilities",
+            "Enabled": true
+        }
+    ],
+    "Modules": [
+        {
+            "Name": "Warfront",
+            "Type": "Runtime",
+            "LoadingPhase": "Default"
+        }
+    ]
+}

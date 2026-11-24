@@ -1,0 +1,10 @@
+# Warfront development log
+
+## 0.1.0
+
+- Added the generated 12 km battlefield with terrain, forests, towns, roads,
+  ruins, vehicles, and battlefield props.
+- Added a main menu, loading screen, and a working single-player entry.
+- Added runtime sky, clouds, sunlight, and atmospheric fog for gameplay maps.
+- Added a development log and GitHub release update checks.
+- Multiplayer remains unavailable.
