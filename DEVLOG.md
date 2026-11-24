@@ -42,3 +42,8 @@
 
 - Added a detailed Czech operator 3D model with helmet, vest, optics and CZ 805 rifle.
 - Added the operator to the generated battlefield.
+
+## 0.1.7
+
+- Repacked the complete Windows game and auto-update package.
+- Included the latest map, weather, 3D operator, inventory and tactical UI.
