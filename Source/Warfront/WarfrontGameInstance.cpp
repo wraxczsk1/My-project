@@ -306,8 +306,10 @@ void UWarfrontGameInstance::BeginSinglePlayer()
     World->GetTimerManager().SetTimer(
         LoadingTimer,
         FTimerDelegate::CreateUObject(this, &UWarfrontGameInstance::FinishLoading),
-        0.45f,
+        1.0f,
         false);
+
+    UE_LOG(LogTemp, Display, TEXT("Warfront singleplayer is starting; loading the active battlefield."));
 }
 
 void UWarfrontGameInstance::FinishLoading()
