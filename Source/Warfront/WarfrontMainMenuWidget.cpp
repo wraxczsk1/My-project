@@ -13,6 +13,7 @@
 #include "Widgets/SBoxPanel.h"
 #include "Widgets/Images/SImage.h"
 #include "Widgets/SBoxPanel.h"
+#include "Widgets/Notifications/SProgressBar.h"
 #include "Widgets/Text/STextBlock.h"
 
 TSharedRef<SWidget> UWarfrontMainMenuWidget::RebuildWidget()
@@ -50,14 +51,67 @@ TSharedRef<SWidget> UWarfrontMainMenuWidget::RebuildWidget()
         .Font(FCoreStyle::GetDefaultFontStyle(FName(TEXT("Bold")), 18))
         .ColorAndOpacity(FSlateColor(FLinearColor(0.88f, 0.90f, 0.86f, 0.95f)));
 
+    CompassStatusText = SNew(STextBlock)
+        .Text(FText::FromString(TEXT("NW 315  |  N 000  |  NE 045")))
+        .Font(FCoreStyle::GetDefaultFontStyle(FName(TEXT("Bold")), 14))
+        .ColorAndOpacity(FSlateColor(FLinearColor(0.84f, 0.86f, 0.82f, 0.95f)));
+
+    ObjectiveStatusText = SNew(STextBlock)
+        .Text(FText::FromString(TEXT("OBJECTIVE\nSECURE THE FORWARD LINE")))
+        .Font(FCoreStyle::GetDefaultFontStyle(FName(TEXT("Bold")), 13))
+        .ColorAndOpacity(FSlateColor(FLinearColor(0.88f, 0.83f, 0.69f, 0.95f)))
+        .Justification(ETextJustify::Right);
+
     GameplayOverlay = SNew(SOverlay)
         .Visibility(EVisibility::Collapsed)
         + SOverlay::Slot()
         .HAlign(HAlign_Left)
         .VAlign(VAlign_Bottom)
-        .Padding(24.0f, 0.0f, 0.0f, 28.0f)
+        .Padding(28.0f, 0.0f, 0.0f, 30.0f)
         [
-            CombatStatusText.ToSharedRef()
+            SNew(SBorder)
+            .BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
+            .BorderBackgroundColor(FLinearColor(0.018f, 0.025f, 0.028f, 0.82f))
+            .Padding(FMargin(16.0f, 10.0f))
+            [
+                SNew(SVerticalBox)
+                + SVerticalBox::Slot().AutoHeight()
+                [
+                    CombatStatusText.ToSharedRef()
+                ]
+                + SVerticalBox::Slot().AutoHeight().Padding(0.0f, 8.0f, 0.0f, 0.0f)
+                [
+                    SNew(SProgressBar)
+                    .Percent(1.0f)
+                    .FillColorAndOpacity(FLinearColor(0.42f, 0.72f, 0.43f, 0.95f))
+                ]
+            ]
+        ]
+        + SOverlay::Slot()
+        .HAlign(HAlign_Center)
+        .VAlign(VAlign_Top)
+        .Padding(0.0f, 18.0f, 0.0f, 0.0f)
+        [
+            SNew(SBorder)
+            .BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
+            .BorderBackgroundColor(FLinearColor(0.018f, 0.025f, 0.028f, 0.68f))
+            .Padding(FMargin(14.0f, 7.0f))
+            [
+                CompassStatusText.ToSharedRef()
+            ]
+        ]
+        + SOverlay::Slot()
+        .HAlign(HAlign_Right)
+        .VAlign(VAlign_Top)
+        .Padding(0.0f, 18.0f, 28.0f, 0.0f)
+        [
+            SNew(SBorder)
+            .BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
+            .BorderBackgroundColor(FLinearColor(0.018f, 0.025f, 0.028f, 0.72f))
+            .Padding(FMargin(14.0f, 10.0f))
+            [
+                ObjectiveStatusText.ToSharedRef()
+            ]
         ]
         + SOverlay::Slot()
         .HAlign(HAlign_Center)
@@ -391,9 +445,19 @@ void UWarfrontMainMenuWidget::BuildInventoryScreen()
         .Padding(0.0f, 0.0f, 0.0f, 16.0f)
         [
             SNew(STextBlock)
-            .Text(FText::FromString(TEXT("INVENTORY")))
-            .Font(FCoreStyle::GetDefaultFontStyle(FName(TEXT("Bold")), 38))
+            .Text(FText::FromString(TEXT("LOADOUT  //  INVENTORY")))
+            .Font(FCoreStyle::GetDefaultFontStyle(FName(TEXT("Bold")), 34))
             .ColorAndOpacity(FSlateColor(FLinearColor(0.88f, 0.83f, 0.69f)))
+        ];
+    Content->AddSlot()
+        .AutoHeight()
+        .HAlign(HAlign_Center)
+        .Padding(0.0f, 0.0f, 0.0f, 10.0f)
+        [
+            SNew(STextBlock)
+            .Text(FText::FromString(TEXT("EQUIPMENT  68/120 kg  |  PRIMARY  |  SECONDARY  |  QUICK ITEMS")))
+            .Font(FCoreStyle::GetDefaultFontStyle(FName(TEXT("Regular")), 13))
+            .ColorAndOpacity(FSlateColor(FLinearColor(0.64f, 0.72f, 0.70f)))
         ];
     Content->AddSlot()
         .AutoHeight()
@@ -548,9 +612,12 @@ void UWarfrontMainMenuWidget::BuildSettingsScreen()
         [
             SNew(STextBlock)
             .Text(FText::FromString(
-                TEXT("GRAPHICS - Quality preset\n")
-                TEXT("SOUND - Master 100%  |  Effects 100%  |  Music 80%\n")
-                TEXT("CONTROLS - WASD, Mouse, Left Mouse, R, Tab, Esc")))
+                TEXT("GRAPHICS\n")
+                TEXT("VIEW DISTANCE  ·  SHADOWS  ·  POST PROCESS  ·  TEXTURES  ·  EFFECTS\n\n")
+                TEXT("AUDIO\n")
+                TEXT("MASTER 100%  ·  EFFECTS 100%  ·  MUSIC 80%\n\n")
+                TEXT("CONTROLS\n")
+                TEXT("WASD MOVE  ·  MOUSE LOOK  ·  LMB FIRE  ·  R RELOAD  ·  TAB INVENTORY  ·  ESC PAUSE")))
             .Font(FCoreStyle::GetDefaultFontStyle(FName(TEXT("Regular")), 16))
             .ColorAndOpacity(FSlateColor(FLinearColor(0.78f, 0.82f, 0.79f)))
             .AutoWrapText(true)
@@ -594,6 +661,21 @@ void UWarfrontMainMenuWidget::BuildSettingsScreen()
                 FOnClicked::CreateLambda([ApplyGraphicsQuality]()
                 {
                     ApplyGraphicsQuality(3);
+                    return FReply::Handled();
+                }))
+        ];
+
+    Content->AddSlot().AutoHeight().Padding(0.0f, 5.0f)
+        [
+            MakeMenuButton(
+                FText::FromString(TEXT("RESET CONTROLS")),
+                FOnClicked::CreateLambda([]()
+                {
+                    if (IConsoleVariable* Sensitivity =
+                        IConsoleManager::Get().FindConsoleVariable(TEXT("Input.MouseSensitivity")))
+                    {
+                        Sensitivity->Set(1.0f);
+                    }
                     return FReply::Handled();
                 }))
         ];

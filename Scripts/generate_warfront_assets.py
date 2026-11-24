@@ -31,6 +31,24 @@ def make_soldier(w, center, facing=0.0):
     w._add_cylinder_between(w.builder, "metal", weapon_start, weapon_end, 2.2, 8)
 
 
+def make_operator(w, center, facing=0.0):
+    x, y, z = center
+    w._add_box(w.builder, "leaves_dark", (x, y + 31.0, z), (30.0, 54.0, 15.0), facing)
+    w._add_box(w.builder, "concrete", (x, y + 57.0, z), (18.0, 18.0, 13.0), facing)
+    w._add_ellipsoid(w.builder, "roof", (x, y + 63.0, z), (12.0, 12.0, 12.0), 14, 8)
+    w._add_ellipsoid(w.builder, "leaves_dark", (x, y + 69.0, z - 2.0), (28.0, 10.0, 26.0), 14, 8)
+    w._add_box(w.builder, "metal", (x, y + 33.0, z - 9.0), (36.0, 28.0, 9.0), facing)
+    w._add_box(w.builder, "roof", (x - 21.0, y + 31.0, z - 2.0), (11.0, 34.0, 16.0), facing)
+    w._add_box(w.builder, "roof", (x + 21.0, y + 31.0, z - 2.0), (11.0, 34.0, 16.0), facing)
+    w._add_box(w.builder, "leaves_light", (x - 8.0, y + 8.0, z), (9.0, 34.0, 11.0), facing)
+    w._add_box(w.builder, "leaves_light", (x + 8.0, y + 8.0, z), (9.0, 34.0, 11.0), facing)
+    w._add_box(w.builder, "metal", (x - 10.0, y + 37.0, z - 16.0), (8.0, 8.0, 12.0), facing)
+    w._add_box(w.builder, "metal", (x + 10.0, y + 37.0, z - 16.0), (8.0, 8.0, 12.0), facing)
+    w._add_box(w.builder, "window", (x, y + 68.0, z - 10.0), (15.0, 4.0, 4.0), facing)
+    w._add_cylinder_between(w.builder, "metal", (x + 18.0, y + 34.0, z - 18.0), (x + 18.0, y + 34.0, z - 92.0), 3.0, 10)
+    w._add_box(w.builder, "bark", (x + 18.0, y + 31.0, z - 30.0), (8.0, 14.0, 26.0), facing)
+
+
 def make_rifle(w, center):
     x, y, z = center
     w._add_box(w.builder, "metal", (x, y, z), (9.0, 9.0, 78.0), 0.0)
@@ -169,6 +187,9 @@ def main():
     for index in range(8):
         make_soldier(type("W", (), {"builder": Equipment.builder, "_add_box": generator._add_box, "_add_ellipsoid": generator._add_ellipsoid, "_add_cylinder_between": generator._add_cylinder_between}), (-180.0 + index * 48.0, 0.0, -30.0 if index % 2 == 0 else 30.0))
 
+    operator = generator.MeshBuilder("CzechOperator")
+    make_operator(type("W", (), {"builder": operator, "_add_box": generator._add_box, "_add_ellipsoid": generator._add_ellipsoid, "_add_cylinder_between": generator._add_cylinder_between}), (0.0, 0.0, 0.0))
+
     rifle = generator.MeshBuilder("CzechWeapons")
     make_rifle(type("W", (), {"builder": rifle, "_add_box": generator._add_box, "_add_cylinder_between": generator._add_cylinder_between}), (0.0, 25.0, 0.0))
 
@@ -207,7 +228,7 @@ def main():
 
     generator._write_glb([
         Equipment.builder, rifle, tank, truck, pistol, helmet, vest, patches,
-        apc, camo_truck, helicopter, drone, aircraft
+        apc, camo_truck, helicopter, drone, aircraft, operator
     ])
 
 

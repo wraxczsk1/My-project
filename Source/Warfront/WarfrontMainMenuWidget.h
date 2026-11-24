@@ -9,6 +9,7 @@
 class SVerticalBox;
 class STextBlock;
 class SOverlay;
+class SProgressBar;
 class UTexture2D;
 
 UCLASS()
@@ -44,6 +45,8 @@ private:
 
     TSharedPtr<SVerticalBox> Content;
     TSharedPtr<STextBlock> CombatStatusText;
+    TSharedPtr<STextBlock> CompassStatusText;
+    TSharedPtr<STextBlock> ObjectiveStatusText;
     TSharedPtr<SBorder> FullscreenBackground;
     TSharedPtr<SBorder> MenuCardBorder;
     TSharedPtr<SBorder> DevLogWindow;

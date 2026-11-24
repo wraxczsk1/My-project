@@ -60,6 +60,7 @@ REQUIRED_EQUIPMENT_MESHES = (
     "czechhelicopter",
     "czechdrone",
     "czechaircraft",
+    "czechoperator",
 )
 
 

@@ -31,3 +31,14 @@
 - Added 13 mesh types for Czech weapons, gear, vehicles, aircraft and drones.
 - Expanded the 12 km battlefield with tents, sandbags and bunker positions.
 - Rebuilt and imported all 3D map and equipment GLB assets into Unreal.
+
+## 0.1.5
+
+- Unified the main menu, pause, inventory and settings with a tactical design system.
+- Added a top compass, objective panel and lower-left combat telemetry.
+- Improved Tab inventory, quality presets and information-heavy settings.
+
+## 0.1.6
+
+- Added a detailed Czech operator 3D model with helmet, vest, optics and CZ 805 rifle.
+- Added the operator to the generated battlefield.

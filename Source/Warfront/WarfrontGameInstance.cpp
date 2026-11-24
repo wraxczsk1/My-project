@@ -365,14 +365,23 @@ void UWarfrontGameInstance::TogglePauseMenu()
 
 void UWarfrontGameInstance::ToggleInventory()
 {
+    if (bInventoryOpen)
+    {
+        bInventoryOpen = false;
+        ResumeGame();
+        return;
+    }
+
     if (MenuWidget.IsValid())
     {
+        bInventoryOpen = true;
         MenuWidget->ToggleInventory();
     }
 }
 
 void UWarfrontGameInstance::ResumeGame()
 {
+    bInventoryOpen = false;
     if (MenuWidget.IsValid())
     {
         MenuWidget->ShowGameplayHud();

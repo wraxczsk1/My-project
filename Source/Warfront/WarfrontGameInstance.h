@@ -38,4 +38,5 @@ private:
     FString LatestReleaseVersion;
     FString LatestReleaseAssetUrl;
     FString LatestReleaseDigest;
+    bool bInventoryOpen = false;
 };

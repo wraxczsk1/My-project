@@ -200,6 +200,7 @@ def generate_ai_map(meshes, equipment=None):
             ("czechhelicopter", "Czech_Helicopter", (1500.0, 800.0, 10900.0)),
             ("czechdrone", "Czech_ReconDrone", (-1500.0, -800.0, 10850.0)),
             ("czechaircraft", "Czech_Aircraft", (2200.0, 1800.0, 11200.0)),
+            ("czechoperator", "Czech_Operator", (-400.0, 300.0, 10600.0)),
         )
         for mesh_name, label, location in equipment_positions:
             if equipment.get(mesh_name):
